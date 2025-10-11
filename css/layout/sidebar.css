@@ -1,0 +1,37 @@
+/**
+ * Sidebar Layout
+ * Mobile first sidebar design
+ */
+
+.sidebar {
+  width: 100%;
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border-color);
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  transition: transform var(--transition-slow);
+  overflow-y: auto;
+}
+
+/* Desktop: fixed width sidebar */
+@media (min-width: 768px) {
+  .sidebar {
+    width: 240px;
+    height: 100vh;
+  }
+}
+
+/* Transitions for showing/hiding */
+.sidebar.hidden {
+  transform: translateX(-100%);
+}
+
+.sidebar.visible {
+  transform: translateX(0);
+}
+
+/* === LEDGER SELECTOR === */
+.ledger-selector {
+  margin-bottom: var(--space-lg);
+}

@@ -1,0 +1,49 @@
+/**
+ * Button Component
+ * Reusable button styles
+ */
+
+.btn {
+  padding: var(--space-sm) var(--space-lg);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-family: inherit;
+}
+
+.btn--primary {
+  background: var(--accent-primary);
+  color: white;
+}
+
+.btn--primary:hover {
+  background: var(--accent-hover);
+}
+
+.btn--primary:active {
+  background: var(--accent-active);
+}
+
+.btn--primary:disabled {
+  background: var(--text-muted);
+  cursor: not-allowed;
+}
+
+.btn--secondary {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.btn--secondary:hover {
+  background: var(--border-color);
+}
+
+/* Button group utility */
+.button-group {
+  display: flex;
+  gap: var(--space-sm);
+  margin-top: var(--space-lg);
+}

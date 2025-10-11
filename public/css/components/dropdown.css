@@ -1,0 +1,106 @@
+/**
+ * Dropdown Component (GENERIEK - herbruikbaar!)
+ * Gebruik voor: ledger selector, account select, filters, etc.
+ * 
+ * HTML structuur:
+ * <div class="dropdown">
+ *   <button class="dropdown__trigger">
+ *     <span>Tekst</span>
+ *     <span class="dropdown__arrow"></span>
+ *   </button>
+ *   <div class="dropdown__menu">
+ *     <a href="#" class="dropdown__item">Item 1</a>
+ *     <div class="dropdown__divider"></div>
+ *     <a href="#" class="dropdown__item">Item 2</a>
+ *   </div>
+ * </div>
+ */
+
+.dropdown {
+  position: relative;
+}
+
+.dropdown__trigger {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  user-select: none;
+  transition: color var(--transition-fast);
+  width: 100%;
+}
+
+.dropdown__trigger:hover {
+  color: var(--text-secondary);
+}
+
+.dropdown__arrow {
+  margin-left: var(--space-sm);
+  margin-top: 5px;
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 5px solid var(--text-primary);
+  transition: transform var(--transition-normal);
+}
+
+.dropdown--open .dropdown__arrow {
+  transform: rotate(180deg);
+}
+
+.dropdown__menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: var(--space-sm);
+  background: var(--bg-hover);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  z-index: 1000;
+  display: none;
+  overflow: hidden;
+}
+
+.dropdown--open .dropdown__menu {
+  display: block;
+}
+
+.dropdown__item {
+  display: block;
+  padding: 10px var(--space-md);
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.dropdown__item:hover {
+  background: var(--bg-sidebar);
+  color: var(--text-primary);
+}
+
+.dropdown__item--active {
+  color: var(--accent-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+.dropdown__item--active::before {
+  content: "• ";
+  margin-right: 4px;
+}
+
+.dropdown__divider {
+  height: 1px;
+  background: var(--divider-color);
+  margin: 4px 0;
+}

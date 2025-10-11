@@ -1,0 +1,99 @@
+/**
+ * Navigation Component
+ * Main navigation links and account list
+ */
+
+nav {
+  display: flex;
+  flex-direction: column;
+  margin-left: calc(var(--space-lg) * -1);
+  margin-right: calc(var(--space-lg) * -1);
+  flex: 1;
+}
+
+.nav-links {
+  display: flex;
+  flex-direction: column;
+}
+
+.nav-link,
+.account-item {
+  padding: var(--space-sm) var(--space-lg);
+  text-decoration: none;
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+  display: block;
+  position: relative;
+}
+
+.nav-link:hover,
+.account-item:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.nav-link.active,
+.account-item.active {
+  background: var(--bg-active);
+  color: var(--text-primary);
+  font-weight: var(--font-weight-medium);
+  border-left: 5px solid var(--accent-primary);
+  padding-left: calc(var(--space-md) - 1px);
+}
+
+.nav-icon {
+  margin-right: var(--space-sm);
+}
+
+.nav-divider {
+  height: 1px;
+  background: var(--divider-color);
+  margin: var(--space-lg) var(--space-lg);
+}
+
+/* === ACCOUNTS LIST === */
+.account-item {
+  display: flex;
+  justify-content: space-between;
+}
+
+.account-balance {
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+
+.account-balance.positive {
+  color: var(--color-positive);
+}
+
+.account-balance.negative {
+  color: var(--color-negative);
+}
+
+.accounts-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-sm) var(--space-lg);
+  margin-bottom: var(--space-sm);
+}
+
+.accounts-header h3 {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.total-balance {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.add-account-link {
+  margin-top: auto;
+}

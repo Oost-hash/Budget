@@ -1,0 +1,64 @@
+/**
+ * Form Components
+ * Inputs, textareas, and checkboxes
+ */
+
+/* === TEXT INPUTS === */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+textarea,
+.input {
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  font-family: inherit;
+  transition: border-color var(--transition-fast);
+}
+
+input:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+}
+
+/* === CHECKBOXES === */
+.checkbox {
+  display: flex;
+  align-items: center;
+  padding: var(--space-sm);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast);
+}
+
+.checkbox:hover {
+  background: var(--bg-hover);
+}
+
+.checkbox input[type="checkbox"] {
+  margin-right: var(--space-sm);
+  width: auto;
+}
+
+.checkbox__label {
+  display: flex;
+  flex-direction: column;
+}
+
+.checkbox__label small {
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs);
+}
+
+/* === FORM HINTS === */
+.hint {
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+  margin-top: var(--space-sm);
+}
