@@ -1,0 +1,12 @@
+services:
+  app:
+    container_name: budget
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./src:/app/src
+      - ./data:/app/data
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
