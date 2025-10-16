@@ -1,0 +1,32 @@
+{
+  "name": "budget",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "ts-node-dev --respawn -r tsconfig-paths/register src/main.ts",
+    "start": "node dist/main.js",
+    "build": "tsc",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "typeorm": "^0.3.27",
+    "better-sqlite3": "^12.4.1",
+    "reflect-metadata": "^0.2.2",
+    "uuid": "^13.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
+    "tsconfig-paths": "^4.2.0",
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.7.2",
+    "@types/uuid": "^10.0.0",
+    "@types/better-sqlite3": "^7.6.13",
+    "vitest": "^3.2.4",
+    "@vitest/ui": "^3.2.4",
+    "@vitest/coverage-v8": "^3.2.4"
+  }
+}
