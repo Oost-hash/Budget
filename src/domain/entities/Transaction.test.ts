@@ -14,8 +14,6 @@ describe('Transaction', () => {
                 'checking-123',
                 'savings-456',
                 200,
-                now,
-                now
             );
 
             // Assert
@@ -36,8 +34,6 @@ describe('Transaction', () => {
                 'checking-123',
                 'savings-456',
                 200,
-                now,
-                now
             );
 
             // Assert
@@ -54,9 +50,7 @@ describe('Transaction', () => {
                     null,
                     'checking-123',
                     'savings-456',
-                    -200,
-                    now,
-                    now
+                    -200
                 );
             }).toThrow('Transfer amount must be positive');
         });
@@ -64,14 +58,14 @@ describe('Transaction', () => {
         test('should throw error when transfer has payee', () => {
             // Act & Assert
             expect(() => {
-                new Transaction('1', 'transfer', now, null, 'payee-123', null, now, now);
+                new Transaction('1', 'transfer', now, null, 'payee-123', null);
             }).toThrow('Transfer cannot have a payee');
         });
 
         test('should throw error when transfer has category', () => {
             // Act & Assert
             expect(() => {
-                new Transaction('1', 'transfer', now, null, null, 'category-123', now, now);
+                new Transaction('1', 'transfer', now, null, null, 'category-123');
             }).toThrow('Transfer cannot have a category');
         });
     });
@@ -86,9 +80,7 @@ describe('Transaction', () => {
                 'employer-123',
                 'salary-456',
                 'checking-789',
-                2000,
-                now,
-                now
+                2000
             );
 
             // Assert
@@ -109,9 +101,7 @@ describe('Transaction', () => {
                     'employer-123',
                     'salary-456',
                     'checking-789',
-                    -2000,
-                    now,
-                    now
+                    -2000
                 );
             }).toThrow('Income amount must be positive');
         });
@@ -119,14 +109,14 @@ describe('Transaction', () => {
         test('should throw error when income has no payee', () => {
             // Act & Assert
             expect(() => {
-                new Transaction('2', 'income', now, null, null, 'category-123', now, now);
+                new Transaction('2', 'income', now, null, null, 'category-123');
             }).toThrow('income must have a payee');
         });
 
         test('should throw error when income has no category', () => {
             // Act & Assert
             expect(() => {
-                new Transaction('2', 'income', now, null, 'payee-123', null, now, now);
+                new Transaction('2', 'income', now, null, 'payee-123', null);
             }).toThrow('income must have a category');
         });
     });
@@ -141,9 +131,7 @@ describe('Transaction', () => {
                 'albert-heijn-123',
                 'groceries-456',
                 'checking-789',
-                50,
-                now,
-                now
+                50
             );
 
             // Assert
@@ -164,9 +152,7 @@ describe('Transaction', () => {
                     'payee-123',
                     'category-456',
                     'checking-789',
-                    -50,
-                    now,
-                    now
+                    -50
                 );
             }).toThrow('Expense amount must be positive');
         });
@@ -174,14 +160,14 @@ describe('Transaction', () => {
         test('should throw error when expense has no payee', () => {
             // Act & Assert
             expect(() => {
-                new Transaction('3', 'expense', now, null, null, 'category-123', now, now);
+                new Transaction('3', 'expense', now, null, null, 'category-123');
             }).toThrow('expense must have a payee');
         });
 
         test('should throw error when expense has no category', () => {
             // Act & Assert
             expect(() => {
-                new Transaction('3', 'expense', now, null, 'payee-123', null, now, now);
+                new Transaction('3', 'expense', now, null, 'payee-123', null);
             }).toThrow('expense must have a category');
         });
     });
@@ -201,9 +187,7 @@ describe('Transaction', () => {
                     'payee-123',
                     'category-456',
                     'checking-789',
-                    50,
-                    now,
-                    now
+                    50
                 );
             }).toThrow('Transaction date cannot be in the future');
         });
@@ -217,11 +201,9 @@ describe('Transaction', () => {
                 'payee-123',
                 'category-456',
                 'checking-789',
-                50,
-                now,
-                now
+                50
             );
-            const originalUpdatedAt = transaction.updatedAt;
+
             const yesterday = new Date(now);
             yesterday.setDate(yesterday.getDate() - 1);
 
@@ -230,7 +212,6 @@ describe('Transaction', () => {
 
             // Assert
             expect(transaction.date).toBe(yesterday);
-            expect(transaction.updatedAt).not.toBe(originalUpdatedAt);
         });
     });
 
@@ -244,18 +225,14 @@ describe('Transaction', () => {
                 'payee-123',
                 'category-456',
                 'checking-789',
-                50,
-                now,
-                now
+                50
             );
-            const originalUpdatedAt = transaction.updatedAt;
 
             // Act
             transaction.updateDescription('New description');
 
             // Assert
             expect(transaction.description).toBe('New description');
-            expect(transaction.updatedAt).not.toBe(originalUpdatedAt);
         });
     });
 });

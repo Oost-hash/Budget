@@ -8,8 +8,6 @@ export class Account {
         private _overdraftLimit: number,
         private _creditLimit: number,
         private _paymentDueDay: number | null,
-        public readonly createdAt: Date,
-        private _updatedAt: Date
     ) {
         this.validateName(_name);
         this.validateIban(_iban);
@@ -46,48 +44,37 @@ export class Account {
         return this._paymentDueDay;
     }
 
-    get updatedAt(): Date {
-        return this._updatedAt;
-    }
-
     rename(newName: string): void {
         this.validateName(newName);
         this._name = newName;
-        this._updatedAt = new Date();
     }
 
     changeType(newType: 'asset' | 'liability'): void {
         this._type = newType;
-        this._updatedAt = new Date();
     }
 
     changeIban(newIban: string | null): void {
         this.validateIban(newIban);
         this._iban = newIban;
-        this._updatedAt = new Date();
     }
 
     toggleSavings(): void {
         this._isSavings = !this._isSavings;
-        this._updatedAt = new Date();
     }
 
     setOverdraftLimit(newLimit: number): void {
         this.validateOverdraftLimit(newLimit);
         this._overdraftLimit = newLimit;
-        this._updatedAt = new Date();
     }
 
     setCreditLimit(newLimit: number): void {
         this.validateCreditLimit(newLimit);
         this._creditLimit = newLimit;
-        this._updatedAt = new Date();
     }
 
     setPaymentDueDay(newDay: number | null): void {
         this.validatePaymentDueDay(newDay);
         this._paymentDueDay = newDay;
-        this._updatedAt = new Date();
     }
 
     private validateName(name: string): void {

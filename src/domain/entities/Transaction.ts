@@ -12,8 +12,6 @@ export class Transaction {
         private _description: string | null,
         private _payeeId: string | null,
         private _categoryId: string | null,
-        public readonly createdAt: Date,
-        private _updatedAt: Date
     ) {
         this.validateDate(_date);
         this.validateTypeRules(_type, _payeeId, _categoryId);
@@ -43,10 +41,6 @@ export class Transaction {
         return this._entries;
     }
 
-    get updatedAt(): Date {
-        return this._updatedAt;
-    }
-
     // Factory methods voor correcte transacties
     static createTransfer(
         id: string,
@@ -55,8 +49,7 @@ export class Transaction {
         fromAccountId: string,
         toAccountId: string,
         amount: number,
-        createdAt: Date,
-        updatedAt: Date
+
     ): Transaction {
         if (amount <= 0) {
             throw new Error('Transfer amount must be positive');
@@ -69,8 +62,6 @@ export class Transaction {
             description,
             null, // geen payee bij transfer
             null, // geen category bij transfer
-            createdAt,
-            updatedAt
         );
 
         // Create 2 entries
@@ -78,10 +69,10 @@ export class Transaction {
         const entryIdTo = `${id}-to`;
 
         transaction.addEntry(
-            new Entry(entryIdFrom, id, fromAccountId, -amount, createdAt, updatedAt)
+            new Entry(entryIdFrom, id, fromAccountId, -amount)
         );
         transaction.addEntry(
-            new Entry(entryIdTo, id, toAccountId, amount, createdAt, updatedAt)
+            new Entry(entryIdTo, id, toAccountId, amount)
         );
 
         return transaction;
@@ -94,9 +85,7 @@ export class Transaction {
         payeeId: string,
         categoryId: string,
         accountId: string,
-        amount: number,
-        createdAt: Date,
-        updatedAt: Date
+        amount: number
     ): Transaction {
         if (amount <= 0) {
             throw new Error('Income amount must be positive');
@@ -109,13 +98,11 @@ export class Transaction {
             description,
             payeeId,
             categoryId,
-            createdAt,
-            updatedAt
         );
 
         const entryId = `${id}-entry`;
         transaction.addEntry(
-            new Entry(entryId, id, accountId, amount, createdAt, updatedAt)
+            new Entry(entryId, id, accountId, amount)
         );
 
         return transaction;
@@ -128,9 +115,7 @@ export class Transaction {
         payeeId: string,
         categoryId: string,
         accountId: string,
-        amount: number,
-        createdAt: Date,
-        updatedAt: Date
+        amount: number
     ): Transaction {
         if (amount <= 0) {
             throw new Error('Expense amount must be positive');
@@ -143,13 +128,11 @@ export class Transaction {
             description,
             payeeId,
             categoryId,
-            createdAt,
-            updatedAt
         );
 
         const entryId = `${id}-entry`;
         transaction.addEntry(
-            new Entry(entryId, id, accountId, -amount, createdAt, updatedAt)
+            new Entry(entryId, id, accountId, -amount)
         );
 
         return transaction;
@@ -162,18 +145,15 @@ export class Transaction {
 
         this._entries.push(entry);
         this.validateEntriesForType();
-        this._updatedAt = new Date();
     }
 
     updateDescription(description: string | null): void {
         this._description = description;
-        this._updatedAt = new Date();
     }
 
     updateDate(date: Date): void {
         this.validateDate(date);
         this._date = date;
-        this._updatedAt = new Date();
     }
 
     private validateDate(date: Date): void {
@@ -224,18 +204,22 @@ export class Transaction {
         }
 
         if (this._type === 'income' || this._type === 'expense') {
-            if (entryCount > 1) {
+            // Check entries
+            if (this._entries.length !== 1) {
                 throw new Error(`${this._type} must have exactly 1 entry`);
             }
 
-            if (entryCount === 1) {
-                const entry = this._entries[0];
-                if (this._type === 'income' && entry.amount <= 0) {
-                    throw new Error('Income entry must have positive amount');
-                }
-                if (this._type === 'expense' && entry.amount >= 0) {
-                    throw new Error('Expense entry must have negative amount');
-                }
+            const entry = this._entries[0];
+            if (!entry) {
+                throw new Error('Entry not found');
+            }
+
+            // Validate amount
+            if (this._type === 'income' && entry.amount <= 0) {
+                throw new Error('Income entry must have positive amount');
+            }
+            if (this._type === 'expense' && entry.amount >= 0) {
+                throw new Error('Expense entry must have negative amount');
             }
         }
     }

@@ -12,7 +12,6 @@ describe('Rule', () => {
     const isRecurring = false;
     const frequency = null;
     const isActive = true;
-    const now = new Date();
 
     // Act
     const rule = new Rule(
@@ -24,8 +23,6 @@ describe('Rule', () => {
       isRecurring,
       frequency,
       isActive,
-      now,
-      now
     );
 
     // Assert
@@ -43,7 +40,6 @@ describe('Rule', () => {
     // Arrange
     const id = '111';
     const payeeId = '789';
-    const now = new Date();
 
     // Act
     const rule = new Rule(
@@ -55,8 +51,6 @@ describe('Rule', () => {
       true,
       'monthly',
       true,
-      now,
-      now
     );
 
     // Assert
@@ -69,11 +63,10 @@ describe('Rule', () => {
     // Arrange
     const id = '111';
     const emptyPayeeId = '';
-    const now = new Date();
 
     // Act & Assert
     expect(() => {
-      new Rule(id, emptyPayeeId, null, null, null, false, null, true, now, now);
+      new Rule(id, emptyPayeeId, null, null, null, false, null, true);
     }).toThrow('Payee ID cannot be empty');
   });
 
@@ -81,11 +74,10 @@ describe('Rule', () => {
     // Arrange
     const id = '111';
     const payeeId = '789';
-    const now = new Date();
 
     // Act & Assert
     expect(() => {
-      new Rule(id, payeeId, null, null, null, false, 'monthly', true, now, now);
+      new Rule(id, payeeId, null, null, null, false, 'monthly', true);
     }).toThrow('Frequency can only be set when isRecurring is true');
   });
 
@@ -93,30 +85,27 @@ describe('Rule', () => {
     // Arrange
     const id = '111';
     const payeeId = '789';
-    const now = new Date();
 
     // Act & Assert
     expect(() => {
-      new Rule(id, payeeId, null, null, null, true, 'daily' as any, true, now, now);
+      new Rule(id, payeeId, null, null, null, true, 'daily' as any, true);
     }).toThrow('Frequency must be monthly, weekly, or yearly');
   });
 
   test('should set category', () => {
     // Arrange
-    const rule = new Rule('111', '789', null, null, null, false, null, true, new Date(), new Date());
-    const originalUpdatedAt = rule.updatedAt;
+    const rule = new Rule('111', '789', null, null, null, false, null, true);
 
     // Act
     rule.setCategory('456');
 
     // Assert
     expect(rule.categoryId).toBe('456');
-    expect(rule.updatedAt).not.toBe(originalUpdatedAt);
   });
 
   test('should clear category', () => {
     // Arrange
-    const rule = new Rule('111', '789', '456', null, null, false, null, true, new Date(), new Date());
+    const rule = new Rule('111', '789', '456', null, null, false, null, true);
 
     // Act
     rule.clearCategory();
@@ -127,20 +116,18 @@ describe('Rule', () => {
 
   test('should set amount', () => {
     // Arrange
-    const rule = new Rule('111', '789', null, null, null, false, null, true, new Date(), new Date());
-    const originalUpdatedAt = rule.updatedAt;
+    const rule = new Rule('111', '789', null, null, null, false, null, true);
 
     // Act
     rule.setAmount(50.00);
 
     // Assert
     expect(rule.amount).toBe(50.00);
-    expect(rule.updatedAt).not.toBe(originalUpdatedAt);
   });
 
   test('should set description template', () => {
     // Arrange
-    const rule = new Rule('111', '789', null, null, null, false, null, true, new Date(), new Date());
+    const rule = new Rule('111', '789', null, null, null, false, null, true);
 
     // Act
     rule.setDescriptionTemplate('Payment to {{payee}}');
@@ -151,20 +138,18 @@ describe('Rule', () => {
 
   test('should activate rule', () => {
     // Arrange
-    const rule = new Rule('111', '789', null, null, null, false, null, false, new Date(), new Date());
-    const originalUpdatedAt = rule.updatedAt;
+    const rule = new Rule('111', '789', null, null, null, false, null, false);
 
     // Act
     rule.activate();
 
     // Assert
     expect(rule.isActive).toBe(true);
-    expect(rule.updatedAt).not.toBe(originalUpdatedAt);
   });
 
   test('should deactivate rule', () => {
     // Arrange
-    const rule = new Rule('111', '789', null, null, null, false, null, true, new Date(), new Date());
+    const rule = new Rule('111', '789', null, null, null, false, null, true);
 
     // Act
     rule.deactivate();
@@ -175,8 +160,7 @@ describe('Rule', () => {
 
   test('should set recurring with frequency', () => {
     // Arrange
-    const rule = new Rule('111', '789', null, null, null, false, null, true, new Date(), new Date());
-    const originalUpdatedAt = rule.updatedAt;
+    const rule = new Rule('111', '789', null, null, null, false, null, true);
 
     // Act
     rule.setRecurring(true, 'weekly');
@@ -184,12 +168,11 @@ describe('Rule', () => {
     // Assert
     expect(rule.isRecurring).toBe(true);
     expect(rule.frequency).toBe('weekly');
-    expect(rule.updatedAt).not.toBe(originalUpdatedAt);
   });
 
   test('should clear recurring', () => {
     // Arrange
-    const rule = new Rule('111', '789', null, null, null, true, 'monthly', true, new Date(), new Date());
+    const rule = new Rule('111', '789', null, null, null, true, 'monthly', true);
 
     // Act
     rule.setRecurring(false, null);
@@ -201,7 +184,7 @@ describe('Rule', () => {
 
   test('should throw error when setting recurring to true without frequency', () => {
     // Arrange
-    const rule = new Rule('111', '789', null, null, null, false, null, true, new Date(), new Date());
+    const rule = new Rule('111', '789', null, null, null, false, null, true);
 
     // Act & Assert
     expect(() => {

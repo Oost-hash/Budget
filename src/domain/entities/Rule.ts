@@ -10,8 +10,6 @@ export class Rule {
     private _isRecurring: boolean,
     private _frequency: Frequency | null,
     private _isActive: boolean,
-    public readonly createdAt: Date,
-    private _updatedAt: Date
   ) {
     this.validatePayeeId(payeeId);
     this.validateRecurringFrequency(_isRecurring, _frequency);
@@ -41,45 +39,34 @@ export class Rule {
     return this._isActive;
   }
 
-  get updatedAt(): Date {
-    return this._updatedAt;
-  }
-
   setCategory(categoryId: string): void {
     this._categoryId = categoryId;
-    this._updatedAt = new Date();
   }
 
   clearCategory(): void {
     this._categoryId = null;
-    this._updatedAt = new Date();
   }
 
   setAmount(amount: number | null): void {
     this._amount = amount;
-    this._updatedAt = new Date();
   }
 
   setDescriptionTemplate(template: string | null): void {
     this._descriptionTemplate = template;
-    this._updatedAt = new Date();
   }
 
   setRecurring(isRecurring: boolean, frequency: Frequency | null): void {
     this.validateRecurringFrequency(isRecurring, frequency);
     this._isRecurring = isRecurring;
     this._frequency = frequency;
-    this._updatedAt = new Date();
   }
 
   activate(): void {
     this._isActive = true;
-    this._updatedAt = new Date();
   }
 
   deactivate(): void {
     this._isActive = false;
-    this._updatedAt = new Date();
   }
 
   private validatePayeeId(payeeId: string): void {
