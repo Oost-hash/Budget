@@ -6,27 +6,23 @@ describe('Group', () => {
     // Arrange
     const id = '123';
     const name = 'Housing';
-    const now = new Date();
 
     // Act
-    const group = new Group(id, name, now, now);
+    const group = new Group(id, name);
 
     // Assert
     expect(group.id).toBe(id);
     expect(group.name).toBe(name);
-    expect(group.createdAt).toBe(now);
-    expect(group.updatedAt).toBe(now);
   });
 
   test('should throw error when name is empty', () => {
     // Arrange
     const id = '123';
     const emptyName = '';
-    const now = new Date();
 
     // Act & Assert
     expect(() => {
-      new Group(id, emptyName, now, now);
+      new Group(id, emptyName);
     }).toThrow('Group name cannot be empty');
   });
 
@@ -34,9 +30,7 @@ describe('Group', () => {
     // Arrange
     const id = '123';
     const originalName = 'Housing';
-    const now = new Date();
-    const group = new Group(id, originalName, now, now);
-    const originalUpdatedAt = group.updatedAt;
+    const group = new Group(id, originalName);
 
     // Act
     const newName = 'Living Expenses';
@@ -44,12 +38,11 @@ describe('Group', () => {
 
     // Assert
     expect(group.name).toBe(newName);
-    expect(group.updatedAt).not.toBe(originalUpdatedAt); 
   });
 
   test('should not rename group with empty name', () => {
     // Arrange
-    const group = new Group('123', 'Housing', new Date(), new Date());
+    const group = new Group('123', 'Housing');
 
     // Act & Assert
     expect(() => {

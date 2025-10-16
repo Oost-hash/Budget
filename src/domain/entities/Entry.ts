@@ -4,8 +4,6 @@ export class Entry {
         public readonly transactionId: string,
         public readonly accountId: string,
         private _amount: number,
-        public readonly createdAt: Date,
-        private _updatedAt: Date
     ) {
         this.validateAmount(_amount);
     }
@@ -14,14 +12,9 @@ export class Entry {
         return this._amount;
     }
 
-    get updatedAt(): Date {
-        return this._updatedAt;
-    }
-
     changeAmount(newAmount: number): void {
         this.validateAmount(newAmount);
         this._amount = newAmount;
-        this._updatedAt = new Date();
     }
 
     private validateAmount(amount: number): void {
