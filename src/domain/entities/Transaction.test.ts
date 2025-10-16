@@ -21,8 +21,8 @@ describe('Transaction', () => {
             expect(transaction.payeeId).toBeNull();
             expect(transaction.categoryId).toBeNull();
             expect(transaction.entries).toHaveLength(2);
-            expect(transaction.entries[0].amount).toBe(-200);
-            expect(transaction.entries[1].amount).toBe(200);
+            expect(transaction.entries[0]!.amount).toBe(-200);
+            expect(transaction.entries[1]!.amount).toBe(200);
         });
 
         test('should have balanced entries (sum = 0)', () => {
@@ -88,7 +88,7 @@ describe('Transaction', () => {
             expect(transaction.payeeId).toBe('employer-123');
             expect(transaction.categoryId).toBe('salary-456');
             expect(transaction.entries).toHaveLength(1);
-            expect(transaction.entries[0].amount).toBe(2000);
+            expect(transaction.entries[0]!.amount).toBe(2000);
         });
 
         test('should throw error when income amount is negative', () => {
@@ -139,7 +139,7 @@ describe('Transaction', () => {
             expect(transaction.payeeId).toBe('albert-heijn-123');
             expect(transaction.categoryId).toBe('groceries-456');
             expect(transaction.entries).toHaveLength(1);
-            expect(transaction.entries[0].amount).toBe(-50);
+            expect(transaction.entries[0]!.amount).toBe(-50);
         });
 
         test('should throw error when expense amount is negative', () => {
