@@ -1,19 +1,18 @@
+import { Money } from '@domain/value-objects/Money';
+import { IBAN } from '@domain/value-objects/IBAN';
+
 export class Account {
     constructor(
         public readonly id: string,
         private _name: string,
         private _type: 'asset' | 'liability',
-        private _iban: string | null,
+        private _iban: IBAN | null,
         private _isSavings: boolean,
-        private _overdraftLimit: number,
-        private _creditLimit: number,
+        private _overdraftLimit: Money,
+        private _creditLimit: Money,
         private _paymentDueDay: number | null,
     ) {
         this.validateName(_name);
-        this.validateIban(_iban);
-        this.validateOverdraftLimit(_overdraftLimit);
-        this.validateCreditLimit(_creditLimit);
-        this.validatePaymentDueDay(_paymentDueDay);
     }
 
     get name(): string {
@@ -24,7 +23,7 @@ export class Account {
         return this._type;
     }
 
-    get iban(): string | null {
+    get iban(): IBAN | null {
         return this._iban;
     }
 
@@ -32,11 +31,11 @@ export class Account {
         return this._isSavings;
     }
 
-    get overdraftLimit(): number {
+    get overdraftLimit(): Money {
         return this._overdraftLimit;
     }
 
-    get creditLimit(): number {
+    get creditLimit(): Money {
         return this._creditLimit;
     }
 
@@ -53,8 +52,7 @@ export class Account {
         this._type = newType;
     }
 
-    changeIban(newIban: string | null): void {
-        this.validateIban(newIban);
+    changeIban(newIban: IBAN | null): void {
         this._iban = newIban;
     }
 
@@ -62,12 +60,12 @@ export class Account {
         this._isSavings = !this._isSavings;
     }
 
-    setOverdraftLimit(newLimit: number): void {
+    setOverdraftLimit(newLimit: Money): void {
         this.validateOverdraftLimit(newLimit);
         this._overdraftLimit = newLimit;
     }
 
-    setCreditLimit(newLimit: number): void {
+    setCreditLimit(newLimit: Money): void {
         this.validateCreditLimit(newLimit);
         this._creditLimit = newLimit;
     }
@@ -83,35 +81,20 @@ export class Account {
         }
     }
 
-    private validateIban(iban: string | null): void {
-        if (iban === null) return; // null is toegestaan
-        
-        // Algemene IBAN validatie: 2 letters (landcode) + minimaal 13 tekens
-        // IBAN is tussen 15-34 karakters lang
-        if (iban.length < 15 || iban.length > 34) {
-            throw new Error('Invalid IBAN format');
-        }
-        
-        // Moet beginnen met 2 hoofdletters gevolgd door cijfers/letters
-        if (!/^[A-Z]{2}[0-9A-Z]+$/.test(iban)) {
-            throw new Error('Invalid IBAN format');
-        }
-    }
-
-    private validateOverdraftLimit(limit: number): void {
-        if (limit < 0) {
+    private validateOverdraftLimit(limit: Money): void {
+        if (limit.isNegative()) {
             throw new Error('Overdraft limit cannot be negative');
         }
     }
 
-    private validateCreditLimit(limit: number): void {
-        if (limit < 0) {
+    private validateCreditLimit(limit: Money): void {
+        if (limit.isNegative()) {
             throw new Error('Credit limit cannot be negative');
         }
     }
 
     private validatePaymentDueDay(day: number | null): void {
-        if (day === null) return; // null is toegestaan
+        if (day === null) return;
         
         if (day < 1 || day > 31) {
             throw new Error('Payment due day must be between 1 and 31');

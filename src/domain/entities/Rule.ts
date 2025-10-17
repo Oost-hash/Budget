@@ -1,3 +1,5 @@
+import { Money } from '@domain/value-objects/Money';
+
 type Frequency = 'monthly' | 'weekly' | 'yearly';
 
 export class Rule {
@@ -5,7 +7,7 @@ export class Rule {
     public readonly id: string,
     public readonly payeeId: string,
     private _categoryId: string | null,
-    private _amount: number | null,
+    private _amount: Money | null,
     private _descriptionTemplate: string | null,
     private _isRecurring: boolean,
     private _frequency: Frequency | null,
@@ -19,7 +21,7 @@ export class Rule {
     return this._categoryId;
   }
 
-  get amount(): number | null {
+  get amount(): Money | null {
     return this._amount;
   }
 
@@ -47,7 +49,7 @@ export class Rule {
     this._categoryId = null;
   }
 
-  setAmount(amount: number | null): void {
+  setAmount(amount: Money | null): void {
     this._amount = amount;
   }
 

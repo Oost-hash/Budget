@@ -1,5 +1,6 @@
 import { describe, test, expect } from 'vitest';
 import { Rule } from './Rule';
+import { Money } from '@domain/value-objects/Money';
 
 describe('Rule', () => {
   test('should create a rule with required fields', () => {
@@ -36,17 +37,18 @@ describe('Rule', () => {
     expect(rule.isActive).toBe(true);
   });
 
-  test('should create a recurring rule with frequency', () => {
+  test('should create a recurring rule with frequency and amount', () => {
     // Arrange
     const id = '111';
     const payeeId = '789';
+    const amount = Money.fromAmount(12.99);
 
     // Act
     const rule = new Rule(
       id,
       payeeId,
       null,
-      12.99,
+      amount,
       'Netflix subscription',
       true,
       'monthly',
@@ -56,7 +58,8 @@ describe('Rule', () => {
     // Assert
     expect(rule.isRecurring).toBe(true);
     expect(rule.frequency).toBe('monthly');
-    expect(rule.amount).toBe(12.99);
+    expect(rule.amount?.amount).toBe(12.99);
+    expect(rule.amount?.currency).toBe('EUR');
   });
 
   test('should throw error when payeeId is empty', () => {
@@ -117,12 +120,34 @@ describe('Rule', () => {
   test('should set amount', () => {
     // Arrange
     const rule = new Rule('111', '789', null, null, null, false, null, true);
+    const amount = Money.fromAmount(50.00);
 
     // Act
-    rule.setAmount(50.00);
+    rule.setAmount(amount);
 
     // Assert
-    expect(rule.amount).toBe(50.00);
+    expect(rule.amount?.amount).toBe(50.00);
+    expect(rule.amount?.currency).toBe('EUR');
+  });
+
+  test('should clear amount by setting it to null', () => {
+    // Arrange
+    const rule = new Rule(
+      '111',
+      '789',
+      null,
+      Money.fromAmount(50),
+      null,
+      false,
+      null,
+      true
+    );
+
+    // Act
+    rule.setAmount(null);
+
+    // Assert
+    expect(rule.amount).toBeNull();
   });
 
   test('should set description template', () => {
@@ -190,5 +215,26 @@ describe('Rule', () => {
     expect(() => {
       rule.setRecurring(true, null);
     }).toThrow('Frequency is required when isRecurring is true');
+  });
+
+  test('should support different currencies for amount', () => {
+    // Arrange
+    const amount = Money.fromAmount(99.99, 'USD');
+
+    // Act
+    const rule = new Rule(
+      '111',
+      '789',
+      null,
+      amount,
+      'Monthly subscription',
+      true,
+      'monthly',
+      true
+    );
+
+    // Assert
+    expect(rule.amount?.currency).toBe('USD');
+    expect(rule.amount?.amount).toBe(99.99);
   });
 });

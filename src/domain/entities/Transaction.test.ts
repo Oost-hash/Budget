@@ -1,11 +1,15 @@
 import { describe, test, expect } from 'vitest';
 import { Transaction } from './Transaction';
+import { Money } from '@domain/value-objects/Money';
 
 describe('Transaction', () => {
     const now = new Date();
 
     describe('Transfer', () => {
         test('should create a valid transfer transaction', () => {
+            // Arrange
+            const amount = Money.fromAmount(200);
+
             // Act
             const transaction = Transaction.createTransfer(
                 '1',
@@ -13,7 +17,7 @@ describe('Transaction', () => {
                 'Transfer to savings',
                 'checking-123',
                 'savings-456',
-                200,
+                amount,
             );
 
             // Assert
@@ -21,11 +25,14 @@ describe('Transaction', () => {
             expect(transaction.payeeId).toBeNull();
             expect(transaction.categoryId).toBeNull();
             expect(transaction.entries).toHaveLength(2);
-            expect(transaction.entries[0]!.amount).toBe(-200);
-            expect(transaction.entries[1]!.amount).toBe(200);
+            expect(transaction.entries[0]!.amount.amount).toBe(-200);
+            expect(transaction.entries[1]!.amount.amount).toBe(200);
         });
 
         test('should have balanced entries (sum = 0)', () => {
+            // Arrange
+            const amount = Money.fromAmount(200);
+
             // Act
             const transaction = Transaction.createTransfer(
                 '1',
@@ -33,15 +40,21 @@ describe('Transaction', () => {
                 null,
                 'checking-123',
                 'savings-456',
-                200,
+                amount,
             );
 
             // Assert
-            const sum = transaction.entries.reduce((acc, e) => acc + e.amount, 0);
-            expect(sum).toBe(0);
+            const sum = transaction.entries.reduce(
+                (acc, e) => acc.add(e.amount),
+                Money.fromAmount(0)
+            );
+            expect(sum.isZero()).toBe(true);
         });
 
-        test('should throw error when transfer amount is negative', () => {
+        test('should throw error when transfer amount is not positive', () => {
+            // Arrange
+            const negativeAmount = Money.fromAmount(-200);
+
             // Act & Assert
             expect(() => {
                 Transaction.createTransfer(
@@ -50,7 +63,24 @@ describe('Transaction', () => {
                     null,
                     'checking-123',
                     'savings-456',
-                    -200
+                    negativeAmount
+                );
+            }).toThrow('Transfer amount must be positive');
+        });
+
+        test('should throw error when transfer amount is zero', () => {
+            // Arrange
+            const zeroAmount = Money.fromAmount(0);
+
+            // Act & Assert
+            expect(() => {
+                Transaction.createTransfer(
+                    '1',
+                    now,
+                    null,
+                    'checking-123',
+                    'savings-456',
+                    zeroAmount
                 );
             }).toThrow('Transfer amount must be positive');
         });
@@ -72,6 +102,9 @@ describe('Transaction', () => {
 
     describe('Income', () => {
         test('should create a valid income transaction', () => {
+            // Arrange
+            const amount = Money.fromAmount(2000);
+
             // Act
             const transaction = Transaction.createIncome(
                 '2',
@@ -80,7 +113,7 @@ describe('Transaction', () => {
                 'employer-123',
                 'salary-456',
                 'checking-789',
-                2000
+                amount
             );
 
             // Assert
@@ -88,10 +121,14 @@ describe('Transaction', () => {
             expect(transaction.payeeId).toBe('employer-123');
             expect(transaction.categoryId).toBe('salary-456');
             expect(transaction.entries).toHaveLength(1);
-            expect(transaction.entries[0]!.amount).toBe(2000);
+            expect(transaction.entries[0]!.amount.amount).toBe(2000);
+            expect(transaction.entries[0]!.amount.isPositive()).toBe(true);
         });
 
-        test('should throw error when income amount is negative', () => {
+        test('should throw error when income amount is not positive', () => {
+            // Arrange
+            const negativeAmount = Money.fromAmount(-2000);
+
             // Act & Assert
             expect(() => {
                 Transaction.createIncome(
@@ -101,7 +138,7 @@ describe('Transaction', () => {
                     'employer-123',
                     'salary-456',
                     'checking-789',
-                    -2000
+                    negativeAmount
                 );
             }).toThrow('Income amount must be positive');
         });
@@ -123,6 +160,9 @@ describe('Transaction', () => {
 
     describe('Expense', () => {
         test('should create a valid expense transaction', () => {
+            // Arrange
+            const amount = Money.fromAmount(50);
+
             // Act
             const transaction = Transaction.createExpense(
                 '3',
@@ -131,7 +171,7 @@ describe('Transaction', () => {
                 'albert-heijn-123',
                 'groceries-456',
                 'checking-789',
-                50
+                amount
             );
 
             // Assert
@@ -139,10 +179,14 @@ describe('Transaction', () => {
             expect(transaction.payeeId).toBe('albert-heijn-123');
             expect(transaction.categoryId).toBe('groceries-456');
             expect(transaction.entries).toHaveLength(1);
-            expect(transaction.entries[0]!.amount).toBe(-50);
+            expect(transaction.entries[0]!.amount.amount).toBe(-50);
+            expect(transaction.entries[0]!.amount.isNegative()).toBe(true);
         });
 
-        test('should throw error when expense amount is negative', () => {
+        test('should throw error when expense amount is not positive', () => {
+            // Arrange
+            const negativeAmount = Money.fromAmount(-50);
+
             // Act & Assert
             expect(() => {
                 Transaction.createExpense(
@@ -152,7 +196,7 @@ describe('Transaction', () => {
                     'payee-123',
                     'category-456',
                     'checking-789',
-                    -50
+                    negativeAmount
                 );
             }).toThrow('Expense amount must be positive');
         });
@@ -177,6 +221,7 @@ describe('Transaction', () => {
             // Arrange
             const futureDate = new Date();
             futureDate.setFullYear(futureDate.getFullYear() + 1);
+            const amount = Money.fromAmount(50);
 
             // Act & Assert
             expect(() => {
@@ -187,13 +232,14 @@ describe('Transaction', () => {
                     'payee-123',
                     'category-456',
                     'checking-789',
-                    50
+                    amount
                 );
             }).toThrow('Transaction date cannot be in the future');
         });
 
         test('should update date successfully', () => {
             // Arrange
+            const amount = Money.fromAmount(50);
             const transaction = Transaction.createExpense(
                 '3',
                 now,
@@ -201,7 +247,7 @@ describe('Transaction', () => {
                 'payee-123',
                 'category-456',
                 'checking-789',
-                50
+                amount
             );
 
             const yesterday = new Date(now);
@@ -218,6 +264,7 @@ describe('Transaction', () => {
     describe('Description updates', () => {
         test('should update description', () => {
             // Arrange
+            const amount = Money.fromAmount(50);
             const transaction = Transaction.createExpense(
                 '3',
                 now,
@@ -225,7 +272,7 @@ describe('Transaction', () => {
                 'payee-123',
                 'category-456',
                 'checking-789',
-                50
+                amount
             );
 
             // Act

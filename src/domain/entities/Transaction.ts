@@ -1,4 +1,5 @@
 import { Entry } from './Entry';
+import { Money } from '@domain/value-objects/Money';
 
 export type TransactionType = 'income' | 'expense' | 'transfer';
 
@@ -48,10 +49,9 @@ export class Transaction {
         description: string | null,
         fromAccountId: string,
         toAccountId: string,
-        amount: number,
-
+        amount: Money,
     ): Transaction {
-        if (amount <= 0) {
+        if (amount.isNegative() || amount.isZero()) {
             throw new Error('Transfer amount must be positive');
         }
 
@@ -60,8 +60,8 @@ export class Transaction {
             'transfer',
             date,
             description,
-            null, // geen payee bij transfer
-            null, // geen category bij transfer
+            null,
+            null,
         );
 
         // Create 2 entries
@@ -69,7 +69,7 @@ export class Transaction {
         const entryIdTo = `${id}-to`;
 
         transaction.addEntry(
-            new Entry(entryIdFrom, id, fromAccountId, -amount)
+            new Entry(entryIdFrom, id, fromAccountId, amount.negate())
         );
         transaction.addEntry(
             new Entry(entryIdTo, id, toAccountId, amount)
@@ -85,9 +85,9 @@ export class Transaction {
         payeeId: string,
         categoryId: string,
         accountId: string,
-        amount: number
+        amount: Money
     ): Transaction {
-        if (amount <= 0) {
+        if (amount.isNegative() || amount.isZero()) {
             throw new Error('Income amount must be positive');
         }
 
@@ -115,9 +115,9 @@ export class Transaction {
         payeeId: string,
         categoryId: string,
         accountId: string,
-        amount: number
+        amount: Money
     ): Transaction {
-        if (amount <= 0) {
+        if (amount.isNegative() || amount.isZero()) {
             throw new Error('Expense amount must be positive');
         }
 
@@ -132,7 +132,7 @@ export class Transaction {
 
         const entryId = `${id}-entry`;
         transaction.addEntry(
-            new Entry(entryId, id, accountId, -amount)
+            new Entry(entryId, id, accountId, amount.negate())
         );
 
         return transaction;
@@ -195,16 +195,25 @@ export class Transaction {
                 throw new Error('Transfer must have exactly 2 entries');
             }
             if (entryCount === 2) {
-                const sum = this._entries.reduce((acc, e) => acc + e.amount, 0);
-                if (Math.abs(sum) > 0.001) {
-                    // floating point tolerance
+                const firstEntry = this._entries[0];
+                if (!firstEntry) {
+                    throw new Error('Entry not found');
+                }
+                
+                // Start accumulator with 0 in the same currency as entries
+                let sum = Money.fromAmount(0, firstEntry.amount.currency);
+                
+                for (const entry of this._entries) {
+                    sum = sum.add(entry.amount);
+                }
+                
+                if (!sum.isZero()) {
                     throw new Error('Transfer entries must be balanced (sum = 0)');
                 }
             }
         }
 
         if (this._type === 'income' || this._type === 'expense') {
-            // Check entries
             if (this._entries.length !== 1) {
                 throw new Error(`${this._type} must have exactly 1 entry`);
             }
@@ -214,11 +223,10 @@ export class Transaction {
                 throw new Error('Entry not found');
             }
 
-            // Validate amount
-            if (this._type === 'income' && entry.amount <= 0) {
+            if (this._type === 'income' && !entry.amount.isPositive()) {
                 throw new Error('Income entry must have positive amount');
             }
-            if (this._type === 'expense' && entry.amount >= 0) {
+            if (this._type === 'expense' && !entry.amount.isNegative()) {
                 throw new Error('Expense entry must have negative amount');
             }
         }

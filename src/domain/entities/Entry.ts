@@ -1,24 +1,26 @@
+import { Money } from "@domain/value-objects/Money";
+
 export class Entry {
     constructor(
         public readonly id: string,
         public readonly transactionId: string,
         public readonly accountId: string,
-        private _amount: number,
+        private _amount: Money,
     ) {
         this.validateAmount(_amount);
     }
 
-    get amount(): number {
+    get amount(): Money {
         return this._amount;
     }
 
-    changeAmount(newAmount: number): void {
+    changeAmount(newAmount: Money): void {
         this.validateAmount(newAmount);
         this._amount = newAmount;
     }
 
-    private validateAmount(amount: number): void {
-        if (amount === 0) {
+    private validateAmount(amount: Money): void {
+        if (amount.isZero()) {
             throw new Error('Entry amount cannot be zero');
         }
     }
