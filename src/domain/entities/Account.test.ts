@@ -1,6 +1,7 @@
 import { describe, test, expect } from 'vitest';
 import { Account } from './Account';
 import { Money } from '@domain/value-objects/Money';
+import { IBAN } from '@domain/value-objects/IBAN';
 
 describe('Account', () => {
     test('should create asset account with valid data', () => {
@@ -8,7 +9,7 @@ describe('Account', () => {
         const id = '789';
         const name = 'Checking Account';
         const type = 'asset';
-        const iban = 'NL01BANK0123456789';
+        const iban = IBAN.create('NL01BANK0123456789');
         const isSavings = false;
         const overdraftLimit = Money.fromAmount(500);
         const creditLimit = Money.fromAmount(0);
@@ -30,7 +31,7 @@ describe('Account', () => {
         expect(account.id).toBe(id);
         expect(account.name).toBe(name);
         expect(account.type).toBe(type);
-        expect(account.iban).toBe(iban);
+        expect(account.iban?.toString()).toBe('NL01BANK0123456789');
         expect(account.isSavings).toBe(isSavings);
         expect(account.overdraftLimit.amount).toBe(500);
         expect(account.creditLimit.amount).toBe(0);
@@ -272,7 +273,7 @@ describe('Account', () => {
             '789',
             'Checking',
             'asset',
-            'NL01BANK0123456789',
+            IBAN.create('NL01BANK0123456789'),
             false,
             Money.fromAmount(0),
             Money.fromAmount(0),
@@ -280,11 +281,11 @@ describe('Account', () => {
         );
 
         // Act
-        const newIban = 'NL02BANK9876543210';
+        const newIban = IBAN.create('NL02BANK9876543210');
         account.changeIban(newIban);
 
         // Assert
-        expect(account.iban).toBe(newIban);
+        expect(account.iban?.toString()).toBe('NL02BANK9876543210');
     });
 
     test('should create account without IBAN (null)', () => {
@@ -387,28 +388,17 @@ describe('Account', () => {
 
     test('should throw error when IBAN format is invalid', () => {
         // Arrange
-        const id = '789';
-        const name = 'Checking';
         const invalidIban = 'INVALID';
 
         // Act & Assert
         expect(() => {
-            new Account(
-                id,
-                name,
-                'asset',
-                invalidIban,
-                false,
-                Money.fromAmount(0),
-                Money.fromAmount(0),
-                null
-            );
-        }).toThrow('Invalid IBAN format');
+            IBAN.create(invalidIban);
+        }).toThrow('Invalid IBAN');
     });
 
     test('should accept valid IBAN format', () => {
         // Arrange
-        const validIban = 'NL91ABNA0417164300';
+        const validIban = IBAN.create('NL91ABNA0417164300');
 
         // Act
         const account = new Account(
@@ -423,7 +413,7 @@ describe('Account', () => {
         );
 
         // Assert
-        expect(account.iban).toBe(validIban);
+        expect(account.iban?.toString()).toBe('NL91ABNA0417164300');
     });
 
     test('should accept null IBAN', () => {
@@ -459,5 +449,61 @@ describe('Account', () => {
         // Assert
         expect(account.overdraftLimit.currency).toBe('USD');
         expect(account.overdraftLimit.amount).toBe(1000);
+    });
+
+    test('should set IBAN to null', () => {
+        // Arrange
+        const account = new Account(
+            '789',
+            'Checking',
+            'asset',
+            IBAN.create('NL01BANK0123456789'),
+            false,
+            Money.fromAmount(0),
+            Money.fromAmount(0),
+            null,
+        );
+
+        // Act
+        account.changeIban(null);
+
+        // Assert
+        expect(account.iban).toBeNull();
+    });
+
+    test('should get country code from IBAN', () => {
+        // Arrange
+        const iban = IBAN.create('DE89370400440532013000');
+        const account = new Account(
+            '789',
+            'German Account',
+            'asset',
+            iban,
+            false,
+            Money.fromAmount(0),
+            Money.fromAmount(0),
+            null,
+        );
+
+        // Assert
+        expect(account.iban?.getCountryCode()).toBe('DE');
+    });
+
+    test('should format IBAN with spaces', () => {
+        // Arrange
+        const iban = IBAN.create('NL91ABNA0417164300');
+        const account = new Account(
+            '789',
+            'Checking',
+            'asset',
+            iban,
+            false,
+            Money.fromAmount(0),
+            Money.fromAmount(0),
+            null,
+        );
+
+        // Assert
+        expect(account.iban?.format()).toBe('NL91 ABNA 0417 1643 00');
     });
 });

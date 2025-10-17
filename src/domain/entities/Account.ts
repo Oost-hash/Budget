@@ -1,21 +1,18 @@
 import { Money } from '@domain/value-objects/Money';
+import { IBAN } from '@domain/value-objects/IBAN';
 
 export class Account {
     constructor(
         public readonly id: string,
         private _name: string,
         private _type: 'asset' | 'liability',
-        private _iban: string | null,
+        private _iban: IBAN | null,
         private _isSavings: boolean,
         private _overdraftLimit: Money,
         private _creditLimit: Money,
         private _paymentDueDay: number | null,
     ) {
         this.validateName(_name);
-        this.validateIban(_iban);
-        this.validateOverdraftLimit(_overdraftLimit);
-        this.validateCreditLimit(_creditLimit);
-        this.validatePaymentDueDay(_paymentDueDay);
     }
 
     get name(): string {
@@ -26,7 +23,7 @@ export class Account {
         return this._type;
     }
 
-    get iban(): string | null {
+    get iban(): IBAN | null {
         return this._iban;
     }
 
@@ -55,8 +52,7 @@ export class Account {
         this._type = newType;
     }
 
-    changeIban(newIban: string | null): void {
-        this.validateIban(newIban);
+    changeIban(newIban: IBAN | null): void {
         this._iban = newIban;
     }
 
@@ -82,18 +78,6 @@ export class Account {
     private validateName(name: string): void {
         if (!name || name.trim().length === 0) {
             throw new Error('Account name cannot be empty');
-        }
-    }
-
-    private validateIban(iban: string | null): void {
-        if (iban === null) return;
-        
-        if (iban.length < 15 || iban.length > 34) {
-            throw new Error('Invalid IBAN format');
-        }
-        
-        if (!/^[A-Z]{2}[0-9A-Z]+$/.test(iban)) {
-            throw new Error('Invalid IBAN format');
         }
     }
 
