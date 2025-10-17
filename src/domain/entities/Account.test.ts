@@ -1,5 +1,6 @@
 import { describe, test, expect } from 'vitest';
 import { Account } from './Account';
+import { Money } from '@domain/value-objects/Money';
 
 describe('Account', () => {
     test('should create asset account with valid data', () => {
@@ -9,8 +10,8 @@ describe('Account', () => {
         const type = 'asset';
         const iban = 'NL01BANK0123456789';
         const isSavings = false;
-        const overdraftLimit = 500;
-        const creditLimit = 0;
+        const overdraftLimit = Money.fromAmount(500);
+        const creditLimit = Money.fromAmount(0);
         const paymentDueDay = null;
 
         // Act
@@ -31,8 +32,8 @@ describe('Account', () => {
         expect(account.type).toBe(type);
         expect(account.iban).toBe(iban);
         expect(account.isSavings).toBe(isSavings);
-        expect(account.overdraftLimit).toBe(overdraftLimit);
-        expect(account.creditLimit).toBe(creditLimit);
+        expect(account.overdraftLimit.amount).toBe(500);
+        expect(account.creditLimit.amount).toBe(0);
         expect(account.paymentDueDay).toBeNull();
     });
 
@@ -43,8 +44,8 @@ describe('Account', () => {
         const type = 'liability';
         const iban = null;
         const isSavings = false;
-        const overdraftLimit = 0;
-        const creditLimit = 5000;
+        const overdraftLimit = Money.fromAmount(0);
+        const creditLimit = Money.fromAmount(5000);
         const paymentDueDay = 15;
 
         // Act
@@ -62,7 +63,7 @@ describe('Account', () => {
         // Assert
         expect(account.id).toBe(id);
         expect(account.type).toBe('liability');
-        expect(account.creditLimit).toBe(creditLimit);
+        expect(account.creditLimit.amount).toBe(5000);
         expect(account.paymentDueDay).toBe(paymentDueDay);
     });
 
@@ -73,7 +74,16 @@ describe('Account', () => {
 
         // Act & Assert
         expect(() => {
-            new Account(id, emptyName, 'asset', null, false, 0, 0, null);
+            new Account(
+                id,
+                emptyName,
+                'asset',
+                null,
+                false,
+                Money.fromAmount(0),
+                Money.fromAmount(0),
+                null
+            );
         }).toThrow('Account name cannot be empty');
     });
 
@@ -85,8 +95,8 @@ describe('Account', () => {
             'asset',
             null,
             false,
-            0,
-            0,
+            Money.fromAmount(0),
+            Money.fromAmount(0),
             null,
         );
         // Act
@@ -105,8 +115,8 @@ describe('Account', () => {
             'asset',
             null,
             false,
-            0,
-            0,
+            Money.fromAmount(0),
+            Money.fromAmount(0),
             null,
         );
 
@@ -124,8 +134,8 @@ describe('Account', () => {
             'asset',
             null,
             false,
-            500,
-            0,
+            Money.fromAmount(500),
+            Money.fromAmount(0),
             null,
         );
 
@@ -144,8 +154,8 @@ describe('Account', () => {
             'liability',
             null,
             false,
-            0,
-            5000,
+            Money.fromAmount(0),
+            Money.fromAmount(5000),
             15,
         );
 
@@ -164,16 +174,16 @@ describe('Account', () => {
             'asset',
             null,
             false,
-            0,
-            0,
+            Money.fromAmount(0),
+            Money.fromAmount(0),
             null,
         );
 
         // Act
-        account.setOverdraftLimit(1000);
+        account.setOverdraftLimit(Money.fromAmount(1000));
 
         // Assert
-        expect(account.overdraftLimit).toBe(1000);
+        expect(account.overdraftLimit.amount).toBe(1000);
     });
 
     test('should set credit limit', () => {
@@ -184,16 +194,16 @@ describe('Account', () => {
             'liability',
             null,
             false,
-            0,
-            0,
+            Money.fromAmount(0),
+            Money.fromAmount(0),
             null,
         );
 
         // Act
-        account.setCreditLimit(5000);
+        account.setCreditLimit(Money.fromAmount(5000));
 
         // Assert
-        expect(account.creditLimit).toBe(5000);
+        expect(account.creditLimit.amount).toBe(5000);
     });
 
     test('should set payment due day', () => {
@@ -204,8 +214,8 @@ describe('Account', () => {
             'liability',
             null,
             false,
-            0,
-            5000,
+            Money.fromAmount(0),
+            Money.fromAmount(5000),
             null,
         );
 
@@ -224,8 +234,8 @@ describe('Account', () => {
             'asset',
             null,
             false,
-            500,
-            0,
+            Money.fromAmount(500),
+            Money.fromAmount(0),
             null,
         );
 
@@ -244,8 +254,8 @@ describe('Account', () => {
             'asset',
             null,
             true,
-            0,
-            0,
+            Money.fromAmount(0),
+            Money.fromAmount(0),
             null,
         );
 
@@ -264,8 +274,8 @@ describe('Account', () => {
             'asset',
             'NL01BANK0123456789',
             false,
-            0,
-            0,
+            Money.fromAmount(0),
+            Money.fromAmount(0),
             null,
         );
 
@@ -290,8 +300,8 @@ describe('Account', () => {
             'asset',
             iban,
             false,
-            0,
-            0,
+            Money.fromAmount(0),
+            Money.fromAmount(0),
             null,
         );
 
@@ -307,14 +317,14 @@ describe('Account', () => {
             'asset',
             null,
             false,
-            0,
-            0,
+            Money.fromAmount(0),
+            Money.fromAmount(0),
             null,
         );
 
         // Act & Assert
         expect(() => {
-            account.setOverdraftLimit(-100);
+            account.setOverdraftLimit(Money.fromAmount(-100));
         }).toThrow('Overdraft limit cannot be negative');
     });
 
@@ -326,14 +336,14 @@ describe('Account', () => {
             'liability',
             null,
             false,
-            0,
-            0,
+            Money.fromAmount(0),
+            Money.fromAmount(0),
             null,
         );
 
         // Act & Assert
         expect(() => {
-            account.setCreditLimit(-500);
+            account.setCreditLimit(Money.fromAmount(-500));
         }).toThrow('Credit limit cannot be negative');
     });
 
@@ -345,8 +355,8 @@ describe('Account', () => {
             'liability',
             null,
             false,
-            0,
-            5000,
+            Money.fromAmount(0),
+            Money.fromAmount(5000),
             null,
         );
 
@@ -364,8 +374,8 @@ describe('Account', () => {
             'liability',
             null,
             false,
-            0,
-            5000,
+            Money.fromAmount(0),
+            Money.fromAmount(5000),
             null,
         );
 
@@ -383,7 +393,16 @@ describe('Account', () => {
 
         // Act & Assert
         expect(() => {
-            new Account(id, name, 'asset', invalidIban, false, 0, 0, null);
+            new Account(
+                id,
+                name,
+                'asset',
+                invalidIban,
+                false,
+                Money.fromAmount(0),
+                Money.fromAmount(0),
+                null
+            );
         }).toThrow('Invalid IBAN format');
     });
 
@@ -398,8 +417,8 @@ describe('Account', () => {
             'asset',
             validIban,
             false,
-            0,
-            0,
+            Money.fromAmount(0),
+            Money.fromAmount(0),
             null,
         );
 
@@ -415,12 +434,30 @@ describe('Account', () => {
             'asset',
             null,
             false,
-            0,
-            0,
+            Money.fromAmount(0),
+            Money.fromAmount(0),
             null,
         );
 
         // Assert
         expect(account.iban).toBeNull();
+    });
+
+    test('should support different currencies for limits', () => {
+        // Arrange
+        const account = new Account(
+            '789',
+            'USD Account',
+            'asset',
+            null,
+            false,
+            Money.fromAmount(1000, 'USD'),
+            Money.fromAmount(0, 'USD'),
+            null,
+        );
+
+        // Assert
+        expect(account.overdraftLimit.currency).toBe('USD');
+        expect(account.overdraftLimit.amount).toBe(1000);
     });
 });
