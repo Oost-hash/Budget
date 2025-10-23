@@ -1,6 +1,5 @@
 import { Money } from '@domain/value-objects/Money';
-
-type Frequency = 'monthly' | 'weekly' | 'yearly';
+import { Frequency } from '@domain/value-objects/Frequency';
 
 export class Rule {
   constructor(
@@ -87,10 +86,6 @@ export class Rule {
 
     if (isRecurring && frequency === null) {
       throw new Error('Frequency is required when isRecurring is true');
-    }
-
-    if (frequency !== null && !['monthly', 'weekly', 'yearly'].includes(frequency)) {
-      throw new Error('Frequency must be monthly, weekly, or yearly');
     }
   }
 }

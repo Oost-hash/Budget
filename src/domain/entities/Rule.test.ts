@@ -1,6 +1,7 @@
 import { describe, test, expect } from 'vitest';
 import { Rule } from './Rule';
 import { Money } from '@domain/value-objects/Money';
+import { Frequency } from '@domain/value-objects/Frequency';
 
 describe('Rule', () => {
   test('should create a rule with required fields', () => {
@@ -42,6 +43,7 @@ describe('Rule', () => {
     const id = '111';
     const payeeId = '789';
     const amount = Money.fromAmount(12.99);
+    const frequency = Frequency.monthly();
 
     // Act
     const rule = new Rule(
@@ -51,13 +53,13 @@ describe('Rule', () => {
       amount,
       'Netflix subscription',
       true,
-      'monthly',
+      frequency,
       true,
     );
 
     // Assert
     expect(rule.isRecurring).toBe(true);
-    expect(rule.frequency).toBe('monthly');
+    expect(rule.frequency?.getType()).toBe('monthly');
     expect(rule.amount?.amount).toBe(12.99);
     expect(rule.amount?.currency).toBe('EUR');
   });
@@ -77,22 +79,23 @@ describe('Rule', () => {
     // Arrange
     const id = '111';
     const payeeId = '789';
+    const frequency = Frequency.monthly();
 
     // Act & Assert
     expect(() => {
-      new Rule(id, payeeId, null, null, null, false, 'monthly', true);
+      new Rule(id, payeeId, null, null, null, false, frequency, true);
     }).toThrow('Frequency can only be set when isRecurring is true');
   });
 
-  test('should throw error when frequency is invalid', () => {
+  test('should throw error when isRecurring is true but frequency is null', () => {
     // Arrange
     const id = '111';
     const payeeId = '789';
 
     // Act & Assert
     expect(() => {
-      new Rule(id, payeeId, null, null, null, true, 'daily' as any, true);
-    }).toThrow('Frequency must be monthly, weekly, or yearly');
+      new Rule(id, payeeId, null, null, null, true, null, true);
+    }).toThrow('Frequency is required when isRecurring is true');
   });
 
   test('should set category', () => {
@@ -186,18 +189,20 @@ describe('Rule', () => {
   test('should set recurring with frequency', () => {
     // Arrange
     const rule = new Rule('111', '789', null, null, null, false, null, true);
+    const frequency = Frequency.weekly();
 
     // Act
-    rule.setRecurring(true, 'weekly');
+    rule.setRecurring(true, frequency);
 
     // Assert
     expect(rule.isRecurring).toBe(true);
-    expect(rule.frequency).toBe('weekly');
+    expect(rule.frequency?.getType()).toBe('weekly');
   });
 
   test('should clear recurring', () => {
     // Arrange
-    const rule = new Rule('111', '789', null, null, null, true, 'monthly', true);
+    const frequency = Frequency.monthly();
+    const rule = new Rule('111', '789', null, null, null, true, frequency, true);
 
     // Act
     rule.setRecurring(false, null);
@@ -220,6 +225,7 @@ describe('Rule', () => {
   test('should support different currencies for amount', () => {
     // Arrange
     const amount = Money.fromAmount(99.99, 'USD');
+    const frequency = Frequency.monthly();
 
     // Act
     const rule = new Rule(
@@ -229,12 +235,52 @@ describe('Rule', () => {
       amount,
       'Monthly subscription',
       true,
-      'monthly',
+      frequency,
       true
     );
 
     // Assert
     expect(rule.amount?.currency).toBe('USD');
     expect(rule.amount?.amount).toBe(99.99);
+  });
+
+  test('should support weekly frequency', () => {
+    // Arrange
+    const frequency = Frequency.weekly();
+
+    // Act
+    const rule = new Rule(
+      '111',
+      '789',
+      null,
+      null,
+      null,
+      true,
+      frequency,
+      true
+    );
+
+    // Assert
+    expect(rule.frequency?.getType()).toBe('weekly');
+  });
+
+  test('should support yearly frequency', () => {
+    // Arrange
+    const frequency = Frequency.yearly();
+
+    // Act
+    const rule = new Rule(
+      '111',
+      '789',
+      null,
+      null,
+      null,
+      true,
+      frequency,
+      true
+    );
+
+    // Assert
+    expect(rule.frequency?.getType()).toBe('yearly');
   });
 });
