@@ -2,6 +2,7 @@ import { describe, test, expect } from 'vitest';
 import { Account } from './Account';
 import { Money } from '@domain/value-objects/Money';
 import { IBAN } from '@domain/value-objects/IBAN';
+import { ExpectedPaymentDueDate } from '@domain/value-objects/ExpectedPaymentDueDate';
 
 describe('Account', () => {
     test('should create asset account with valid data', () => {
@@ -13,7 +14,7 @@ describe('Account', () => {
         const isSavings = false;
         const overdraftLimit = Money.fromAmount(500);
         const creditLimit = Money.fromAmount(0);
-        const paymentDueDay = null;
+        const paymentDueDate = null;
 
         // Act
         const account = new Account(
@@ -24,7 +25,7 @@ describe('Account', () => {
             isSavings,
             overdraftLimit,
             creditLimit,
-            paymentDueDay,
+            paymentDueDate,
         );
 
         // Assert
@@ -35,7 +36,7 @@ describe('Account', () => {
         expect(account.isSavings).toBe(isSavings);
         expect(account.overdraftLimit.amount).toBe(500);
         expect(account.creditLimit.amount).toBe(0);
-        expect(account.paymentDueDay).toBeNull();
+        expect(account.paymentDueDate).toBeNull();
     });
 
     test('should create liability account with valid data', () => {
@@ -47,7 +48,7 @@ describe('Account', () => {
         const isSavings = false;
         const overdraftLimit = Money.fromAmount(0);
         const creditLimit = Money.fromAmount(5000);
-        const paymentDueDay = 15;
+        const paymentDueDate = ExpectedPaymentDueDate.create(15, 'before');
 
         // Act
         const account = new Account(
@@ -58,14 +59,15 @@ describe('Account', () => {
             isSavings,
             overdraftLimit,
             creditLimit,
-            paymentDueDay,
+            paymentDueDate,
         );
 
         // Assert
         expect(account.id).toBe(id);
         expect(account.type).toBe('liability');
         expect(account.creditLimit.amount).toBe(5000);
-        expect(account.paymentDueDay).toBe(paymentDueDay);
+        expect(account.paymentDueDate?.getDayOfMonth()).toBe(15);
+        expect(account.paymentDueDate?.getShiftDirection()).toBe('before');
     });
 
     test('should throw error when name is empty', () => {
@@ -149,6 +151,7 @@ describe('Account', () => {
 
     test('should change type from liability to asset', () => {
         // Arrange
+        const dueDate = ExpectedPaymentDueDate.create(15, 'before');
         const account = new Account(
             '789',
             'Account',
@@ -157,7 +160,7 @@ describe('Account', () => {
             false,
             Money.fromAmount(0),
             Money.fromAmount(5000),
-            15,
+            dueDate,
         );
 
         // Act
@@ -207,7 +210,7 @@ describe('Account', () => {
         expect(account.creditLimit.amount).toBe(5000);
     });
 
-    test('should set payment due day', () => {
+    test('should set payment due date', () => {
         // Arrange
         const account = new Account(
             '789',
@@ -221,10 +224,33 @@ describe('Account', () => {
         );
 
         // Act
-        account.setPaymentDueDay(20);
+        const dueDate = ExpectedPaymentDueDate.create(20, 'after');
+        account.setPaymentDueDate(dueDate);
 
         // Assert
-        expect(account.paymentDueDay).toBe(20);
+        expect(account.paymentDueDate?.getDayOfMonth()).toBe(20);
+        expect(account.paymentDueDate?.getShiftDirection()).toBe('after');
+    });
+
+    test('should clear payment due date by setting to null', () => {
+        // Arrange
+        const dueDate = ExpectedPaymentDueDate.create(15, 'before');
+        const account = new Account(
+            '789',
+            'Credit Card',
+            'liability',
+            null,
+            false,
+            Money.fromAmount(0),
+            Money.fromAmount(5000),
+            dueDate,
+        );
+
+        // Act
+        account.setPaymentDueDate(null);
+
+        // Assert
+        expect(account.paymentDueDate).toBeNull();
     });
 
     test('should toggle is_savings from false to true', () => {
@@ -348,44 +374,6 @@ describe('Account', () => {
         }).toThrow('Credit limit cannot be negative');
     });
 
-    test('should throw error when payment due day is less than 1', () => {
-        // Arrange
-        const account = new Account(
-            '789',
-            'Credit Card',
-            'liability',
-            null,
-            false,
-            Money.fromAmount(0),
-            Money.fromAmount(5000),
-            null,
-        );
-
-        // Act & Assert
-        expect(() => {
-            account.setPaymentDueDay(0);
-        }).toThrow('Payment due day must be between 1 and 31');
-    });
-
-    test('should throw error when payment due day is greater than 31', () => {
-        // Arrange
-        const account = new Account(
-            '789',
-            'Credit Card',
-            'liability',
-            null,
-            false,
-            Money.fromAmount(0),
-            Money.fromAmount(5000),
-            null,
-        );
-
-        // Act & Assert
-        expect(() => {
-            account.setPaymentDueDay(32);
-        }).toThrow('Payment due day must be between 1 and 31');
-    });
-
     test('should throw error when IBAN format is invalid', () => {
         // Arrange
         const invalidIban = 'INVALID';
@@ -505,5 +493,17 @@ describe('Account', () => {
 
         // Assert
         expect(account.iban?.format()).toBe('NL91 ABNA 0417 1643 00');
+    });
+
+    test('should support different shift directions for payment due date', () => {
+        // Arrange
+        const dueDateBefore = ExpectedPaymentDueDate.create(15, 'before');
+        const dueDateAfter = ExpectedPaymentDueDate.create(20, 'after');
+        const dueDateNone = ExpectedPaymentDueDate.create(25, 'none');
+
+        // Assert
+        expect(dueDateBefore.getShiftDirection()).toBe('before');
+        expect(dueDateAfter.getShiftDirection()).toBe('after');
+        expect(dueDateNone.getShiftDirection()).toBe('none');
     });
 });

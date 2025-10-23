@@ -1,5 +1,6 @@
 import { Money } from '@domain/value-objects/Money';
 import { IBAN } from '@domain/value-objects/IBAN';
+import { ExpectedPaymentDueDate } from '@domain/value-objects/ExpectedPaymentDueDate';
 
 export class Account {
     constructor(
@@ -10,7 +11,7 @@ export class Account {
         private _isSavings: boolean,
         private _overdraftLimit: Money,
         private _creditLimit: Money,
-        private _paymentDueDay: number | null,
+        private _paymentDueDate: ExpectedPaymentDueDate | null,
     ) {
         this.validateName(_name);
     }
@@ -39,8 +40,8 @@ export class Account {
         return this._creditLimit;
     }
 
-    get paymentDueDay(): number | null {
-        return this._paymentDueDay;
+    get paymentDueDate(): ExpectedPaymentDueDate | null {
+        return this._paymentDueDate;
     }
 
     rename(newName: string): void {
@@ -70,9 +71,8 @@ export class Account {
         this._creditLimit = newLimit;
     }
 
-    setPaymentDueDay(newDay: number | null): void {
-        this.validatePaymentDueDay(newDay);
-        this._paymentDueDay = newDay;
+    setPaymentDueDate(dueDate: ExpectedPaymentDueDate | null): void {
+        this._paymentDueDate = dueDate;
     }
 
     private validateName(name: string): void {
@@ -90,14 +90,6 @@ export class Account {
     private validateCreditLimit(limit: Money): void {
         if (limit.isNegative()) {
             throw new Error('Credit limit cannot be negative');
-        }
-    }
-
-    private validatePaymentDueDay(day: number | null): void {
-        if (day === null) return;
-        
-        if (day < 1 || day > 31) {
-            throw new Error('Payment due day must be between 1 and 31');
         }
     }
 }
