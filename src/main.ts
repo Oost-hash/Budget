@@ -4,9 +4,11 @@ import { DataSource } from "typeorm";
 import { CategoryEntity } from "@infrastructure/database/entities/CategoryEntity";
 import { GroupEntity } from "@infrastructure/database/entities/GroupEntity";
 import { AccountEntity } from "@infrastructure/database/entities/AccountEntity";
+import { PayeeEntity } from "@infrastructure/database/entities/PayeeEntity";
 import { createGroupRoutes } from "@infrastructure/http/routes/GroupRoutes";
 import { createCategoryRoutes } from "@infrastructure/http/routes/CategoryRoutes";
 import { createAccountRoutes } from "@infrastructure/http/routes/AccountRoutes";
+import { createPayeeRoutes } from "@infrastructure/http/routes/PayeeRoutes";
 
 async function bootstrap() {
   // 1. Database setup
@@ -19,6 +21,7 @@ async function bootstrap() {
       CategoryEntity,
       GroupEntity,
       AccountEntity,
+      PayeeEntity,
     ]
   });
 
@@ -42,6 +45,9 @@ async function bootstrap() {
 
   // Account routes
   app.use("/accounts", createAccountRoutes(dataSource));
+
+  // Payee routes
+  app.use("/payees", createPayeeRoutes(dataSource));
 
   // 4. Start server
   const port = 3000;
