@@ -1,12 +1,18 @@
 services:
-  app:
-    container_name: budget
-    build: .
+  api:
+    container_name: budget-api-dev
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile.dev
     ports:
       - "3000:3000"
     volumes:
-      - ./src:/app/src
-      - ./data:/app/data
+      # Hot reload - mount source code
+      - ./apps/api/src:/app/src
+      # Persistent database
+      - ./apps/api/data:/app/data
+      # Don't overwrite node_modules
       - /app/node_modules
     environment:
       - NODE_ENV=development
+    restart: unless-stopped
