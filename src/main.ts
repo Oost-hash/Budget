@@ -3,8 +3,10 @@ import express from "express";
 import { DataSource } from "typeorm";
 import { CategoryEntity } from "@infrastructure/database/entities/CategoryEntity";
 import { GroupEntity } from "@infrastructure/database/entities/GroupEntity";
+import { AccountEntity } from "@infrastructure/database/entities/AccountEntity";
 import { createGroupRoutes } from "@infrastructure/http/routes/GroupRoutes";
 import { createCategoryRoutes } from "@infrastructure/http/routes/CategoryRoutes";
+import { createAccountRoutes } from "@infrastructure/http/routes/AccountRoutes";
 
 async function bootstrap() {
   // 1. Database setup
@@ -16,6 +18,7 @@ async function bootstrap() {
     entities: [
       CategoryEntity,
       GroupEntity,
+      AccountEntity,
     ]
   });
 
@@ -36,6 +39,9 @@ async function bootstrap() {
 
   // Category routes
   app.use("/categories", createCategoryRoutes(dataSource));
+
+  // Account routes
+  app.use("/accounts", createAccountRoutes(dataSource));
 
   // 4. Start server
   const port = 3000;
