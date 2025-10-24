@@ -1,0 +1,21 @@
+# Development Dockerfile for API
+FROM node:22-alpine
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files and TypeScript config
+COPY package*.json ./
+COPY tsconfig.json ./
+
+# Install ALL dependencies (including dev dependencies for ts-node-dev)
+RUN npm install --verbose
+
+# Source code will be mounted via volume for hot reload
+# No COPY of src/ needed here
+
+# Expose API port
+EXPOSE 3000
+
+# Development command with hot reload
+CMD ["npm", "run", "dev"]
