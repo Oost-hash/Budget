@@ -1,5 +1,6 @@
 import "reflect-metadata";
 import express from "express";
+import cors from "cors";
 import { DataSource } from "typeorm";
 import { CategoryEntity } from "@infrastructure/database/entities/CategoryEntity";
 import { GroupEntity } from "@infrastructure/database/entities/GroupEntity";
@@ -38,6 +39,13 @@ async function bootstrap() {
 
   // 2. Express setup
   const app = express();
+  
+  // CORS middleware - Allow frontend to call API
+  app.use(cors({
+    origin: 'http://localhost:5173', // Frontend URL
+    credentials: true
+  }));
+  
   app.use(express.json());
 
   // 3. Routes
