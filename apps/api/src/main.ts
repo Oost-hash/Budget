@@ -76,7 +76,7 @@ async function bootstrap() {
     app.use(express.static(publicPath));
 
     // SPA fallback - send index.html for all non-API routes
-    app.get('*', (_req, res) => {
+    app.use((_req, res) => {
       res.sendFile(path.join(publicPath, 'index.html'));
     });
   }

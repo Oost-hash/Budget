@@ -1,0 +1,56 @@
+# Node modules (installed via npm ci in Docker)
+**/node_modules
+**/npm-debug.log
+
+# Test files - exclude from production build
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+**/__tests__
+**/__mocks__
+**/coverage
+**/.vitest
+
+# Development files
+**/*.dev.ts
+**/.env.local
+**/.env.*.local
+
+# Build output (rebuilt in Docker stages)
+**/dist
+**/build
+
+# Database files (use volumes instead)
+**/*.sqlite
+**/*.db
+**/data/*.sqlite
+**/data/*.db
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Documentation
+README.md
+**/docs
+CHANGELOG.md
+LICENSE
+
+# CI/CD
+.github
+.gitlab-ci.yml
+
+# Docker development files
+.dockerignore
+**/Dockerfile.dev
+docker-compose.yml
