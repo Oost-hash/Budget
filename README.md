@@ -2,6 +2,17 @@
 
 A personal finance application with clean architecture. Local-first, your data stays on your machine.
 
+## ⚠️ Security Warning
+
+**This application currently has NO authentication or security measures.**
+
+- Do NOT expose this to the internet
+- Do NOT use on shared servers
+- Only run locally on your own machine
+- Authentication and HTTPS are planned but not yet implemented
+
+Your financial data is stored in an unencrypted SQLite database with no access controls.
+
 ## Status
 
 **Backend - Complete**
