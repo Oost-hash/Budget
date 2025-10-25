@@ -4,16 +4,24 @@ import tailwindcss from '@tailwindcss/vite'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [
-    svelte(),
-    tailwindcss()
-  ],
+  plugins: [svelte(), tailwindcss()],
   server: {
-    host: '0.0.0.0', // Listen on all network interfaces (needed for Docker)
+    host: '0.0.0.0',
     port: 5173,
-    strictPort: true, // Fail if port is already in use
+    strictPort: true,
     watch: {
-      usePolling: true // Needed for hot reload in Docker
+      usePolling: true
+    },
+    // NIEUW: Proxy API calls naar backend
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true
+      },
+      '/health': {
+        target: 'http://localhost:3000',
+        changeOrigin: true
+      }
     }
   }
 })

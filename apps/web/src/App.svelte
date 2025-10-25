@@ -7,7 +7,7 @@
   // Test API connection
   onMount(async () => {
     try {
-      const response = await fetch('http://localhost:3000/health');
+      const response = await fetch('/health');
       const data = await response.json();
       apiHealth = `API Status: ${data.status}`;
     } catch (error) {
