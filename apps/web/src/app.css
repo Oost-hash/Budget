@@ -1,39 +1,42 @@
-:root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+/* Import Tailwind CSS v4 - single import statement */
+@import "tailwindcss";
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-}
-
-#app {
-  width: 100%;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
+/* Custom base styles */
+@layer base {
+  * {
+    @apply m-0 p-0 box-border;
   }
+
+  body {
+    @apply min-h-screen bg-gray-50 text-gray-900;
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  }
+
+  /* Dark mode support */
+  @media (prefers-color-scheme: dark) {
+    body {
+      @apply bg-gray-900 text-gray-100;
+    }
+  }
+}
+
+/* Custom theme configuration */
+@theme {
+  /* Custom primary color palette for budget app */
+  --color-primary-50: oklch(0.97 0.02 25);
+  --color-primary-100: oklch(0.94 0.04 25);
+  --color-primary-200: oklch(0.88 0.08 25);
+  --color-primary-300: oklch(0.79 0.12 25);
+  --color-primary-400: oklch(0.69 0.15 25);
+  --color-primary-500: oklch(0.61 0.17 25);
+  --color-primary-600: oklch(0.53 0.18 25);
+  --color-primary-700: oklch(0.45 0.17 25);
+  --color-primary-800: oklch(0.38 0.14 25);
+  --color-primary-900: oklch(0.32 0.11 25);
+  --color-primary-950: oklch(0.21 0.07 25);
+}
+
+/* Custom components (later toe te voegen) */
+@layer components {
+  /* Add custom component styles here */
 }

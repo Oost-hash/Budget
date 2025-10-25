@@ -20,71 +20,30 @@
   }
 </script>
 
-<main>
-  <h1>Budget Tracker</h1>
+<main class="max-w-4xl mx-auto p-8 text-center">
+  <h1 class="text-5xl font-bold text-primary-600 mb-8">
+    Budget Tracker
+  </h1>
   
-  <div class="card">
-    <button onclick={increment}>
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 mb-8">
+    <button 
+      onclick={increment}
+      class="px-6 py-3 text-xl font-semibold rounded-lg border-2 border-primary-600 bg-white text-primary-600 hover:bg-primary-600 hover:text-white transition-all duration-200"
+    >
       Count is {count}
     </button>
-    <p>Click the button to test Svelte reactivity</p>
+    <p class="mt-4 text-gray-600 dark:text-gray-400">
+      Click the button to test Svelte reactivity
+    </p>
   </div>
 
-  <div class="api-status">
-    <p>{apiHealth}</p>
+  <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-6 mb-8">
+    <p class="text-lg font-medium text-blue-900 dark:text-blue-100">
+      {apiHealth}
+    </p>
   </div>
 
-  <p class="info">
-    Frontend running on Vite + Svelte 5 + TypeScript
+  <p class="text-gray-500 dark:text-gray-400">
+    Frontend running on Vite + Svelte 5 + TypeScript + Tailwind CSS
   </p>
 </main>
-
-<style>
-  main {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 2rem;
-    text-align: center;
-  }
-
-  h1 {
-    color: #ff3e00;
-    font-size: 3rem;
-    margin-bottom: 2rem;
-  }
-
-  .card {
-    padding: 2rem;
-    background: #f0f0f0;
-    border-radius: 8px;
-    margin: 2rem 0;
-  }
-
-  button {
-    padding: 0.75rem 1.5rem;
-    font-size: 1.25rem;
-    border-radius: 8px;
-    border: 2px solid #ff3e00;
-    background: white;
-    color: #ff3e00;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  button:hover {
-    background: #ff3e00;
-    color: white;
-  }
-
-  .api-status {
-    margin: 2rem 0;
-    padding: 1rem;
-    background: #e8f4f8;
-    border-radius: 8px;
-  }
-
-  .info {
-    color: #666;
-    margin-top: 2rem;
-  }
-</style>
