@@ -27,11 +27,9 @@ services:
     ports:
       - "5173:5173"
     volumes:
-      # Hot reload - mount source code
       - ./apps/web/src:/app/src
-      # Mount public folder (if we add assets later)
       - ./apps/web/public:/app/public
-      # Don't overwrite node_modules
+      - ./apps/web/scripts:/app/scripts 
       - /app/node_modules
     environment:
       - NODE_ENV=development
