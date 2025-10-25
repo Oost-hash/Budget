@@ -2,7 +2,7 @@
 
 A personal finance application with clean architecture. Local-first, your data stays on your machine.
 
-## Still in alpha - ⚠️ Security Warning
+## ⚠️ Still in alpha - Security Warning
 
 **This application currently has NO authentication or security measures.**
 
