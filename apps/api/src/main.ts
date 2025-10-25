@@ -21,8 +21,8 @@ async function bootstrap() {
   const dataSource = new DataSource({
     type: "better-sqlite3",
     database: "./data/budget.sqlite",
-    synchronize: true, // Auto-create tables (alleen dev!)
-    logging: true,     // Zie SQL queries in console
+    synchronize: true, // TODO: Disable in production, use migrations (Issue #15)
+    logging: true,     // TODO: Disable in production (Issue #15)
     entities: [
       CategoryEntity,
       GroupEntity,
@@ -39,39 +39,49 @@ async function bootstrap() {
 
   // 2. Express setup
   const app = express();
-  
+
   // CORS middleware - Allow frontend to call API
   app.use(cors({
     origin: 'http://localhost:5173', // Frontend URL
     credentials: true
   }));
-  
+
   app.use(express.json());
 
-  // 3. Routes
   app.get("/health", (_req, res) => {
     res.json({ status: "ok" });
   });
 
-  // Group routes
-  app.use("/groups", createGroupRoutes(dataSource));
+  // API Router - all business routes under /api prefix
+  const apiRouter = express.Router();
 
-  // Category routes
-  app.use("/categories", createCategoryRoutes(dataSource));
+  apiRouter.use("/groups", createGroupRoutes(dataSource));
+  apiRouter.use("/categories", createCategoryRoutes(dataSource));
+  apiRouter.use("/accounts", createAccountRoutes(dataSource));
+  apiRouter.use("/payees", createPayeeRoutes(dataSource));
+  apiRouter.use("/rules", createRuleRoutes(dataSource));
+  apiRouter.use("/transactions", createTransactionRoutes(dataSource));
 
-  // Account routes
-  app.use("/accounts", createAccountRoutes(dataSource));
+  // Mount API router
+  app.use("/api", apiRouter);
 
-  // Payee routes
-  app.use("/payees", createPayeeRoutes(dataSource));
+  // 4. Static files (production only)
+  // In production, the frontend build will be in /app/public
+  // In development, Vite dev server handles this
+  if (process.env.NODE_ENV === 'production') {
+    const path = require('path');
+    const publicPath = path.join(__dirname, '../public');
 
-  // Rule routes
-  app.use("/rules", createRuleRoutes(dataSource));
+    // Serve static files
+    app.use(express.static(publicPath));
 
-  // Transaction routes
-  app.use("/transactions", createTransactionRoutes(dataSource));
+    // SPA fallback - send index.html for all non-API routes
+    app.use((_req, res) => {
+      res.sendFile(path.join(publicPath, 'index.html'));
+    });
+  }
 
-  // 4. Start server
+  // 5. Start server
   const port = 3000;
   app.listen(port, () => {
     console.log(`🚀 Server running on http://localhost:${port}`);
