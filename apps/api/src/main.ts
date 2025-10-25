@@ -21,8 +21,8 @@ async function bootstrap() {
   const dataSource = new DataSource({
     type: "better-sqlite3",
     database: "./data/budget.sqlite",
-    synchronize: true, // Auto-create tables (alleen dev!)
-    logging: true,     // Zie SQL queries in console
+    synchronize: true, // TODO: Disable in production, use migrations (Issue #15)
+    logging: true,     // TODO: Disable in production (Issue #15)
     entities: [
       CategoryEntity,
       GroupEntity,
