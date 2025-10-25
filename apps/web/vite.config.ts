@@ -15,11 +15,11 @@ export default defineConfig({
     // NIEUW: Proxy API calls naar backend
     proxy: {
       '/api': {
-        target: 'http://localhost:3000',
+        target: 'http://api:3000',
         changeOrigin: true
       },
       '/health': {
-        target: 'http://localhost:3000',
+        target: 'http://api:3000',
         changeOrigin: true
       }
     }
