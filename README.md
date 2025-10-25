@@ -1,4 +1,4 @@
-# Budget Tracker
+# Budget
 
 A personal finance application with clean architecture. Local-first, your data stays on your machine.
 
