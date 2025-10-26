@@ -16,7 +16,8 @@
     "better-sqlite3": "^12.4.1",
     "reflect-metadata": "^0.2.2",
     "uuid": "^13.0.0",
-    "cors": "^2.8.5"
+    "cors": "^2.8.5",
+    "zod": "^4.1.12"
   },
   "devDependencies": {
     "typescript": "^5.9.3",

@@ -10,6 +10,8 @@ import { GetRulesByPayee } from '@application/use-cases/rules/GetRulesByPayee';
 import { GetRecurringRules } from '@application/use-cases/rules/GetRecurringRules';
 import { UpdateRule } from '@application/use-cases/rules/UpdateRule';
 import { DeleteRule } from '@application/use-cases/rules/DeleteRule';
+import { validate } from '@infrastructure/http/middleware/validate';
+import { CreateRuleSchema, UpdateRuleSchema } from '@infrastructure/http/schemas/RuleSchemas';
 
 export function createRuleRoutes(dataSource: DataSource): Router {
   const router = Router();
@@ -18,7 +20,7 @@ export function createRuleRoutes(dataSource: DataSource): Router {
   const categoryRepo = new CategoryRepository(dataSource);
 
   // POST /rules - Create new rule
-  router.post('/', async (req: Request, res: Response) => {
+  router.post('/', validate(CreateRuleSchema), async (req: Request, res: Response) => {
     try {
       const useCase = new CreateRule(ruleRepo, payeeRepo, categoryRepo);
       const result = await useCase.execute(req.body);
@@ -98,7 +100,7 @@ export function createRuleRoutes(dataSource: DataSource): Router {
   });
 
   // PUT /rules/:id - Update rule
-  router.put('/:id', async (req: Request, res: Response) => {
+  router.put('/:id', validate(UpdateRuleSchema), async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
       if (!id) {

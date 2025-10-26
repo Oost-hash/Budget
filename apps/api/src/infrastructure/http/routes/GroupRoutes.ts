@@ -6,13 +6,15 @@ import { GetAllGroups } from '@application/use-cases/categories/GetAllGroups';
 import { GetGroup } from '@application/use-cases/categories/GetGroup';
 import { UpdateGroup } from '@application/use-cases/categories/UpdateGroup';
 import { DeleteGroup } from '@application/use-cases/categories/DeleteGroup';
+import { validate } from '@infrastructure/http/middleware/validate';
+import { CreateGroupSchema, UpdateGroupSchema } from '@infrastructure/http/schemas/GroupSchemas';
 
 export function createGroupRoutes(dataSource: DataSource): Router {
   const router = Router();
   const groupRepo = new GroupRepository(dataSource);
 
   // POST /groups - Create new group
-  router.post('/', async (req: Request, res: Response) => {
+  router.post('/', validate(CreateGroupSchema), async (req: Request, res: Response) => {
     try {
       const useCase = new CreateGroup(groupRepo);
       const result = await useCase.execute(req.body);
@@ -59,7 +61,7 @@ export function createGroupRoutes(dataSource: DataSource): Router {
   });
 
   // PUT /groups/:id - Update group
-  router.put('/:id', async (req: Request, res: Response) => {
+  router.put('/:id', validate(UpdateGroupSchema), async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
       if (!id) {

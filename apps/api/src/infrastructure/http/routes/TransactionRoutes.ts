@@ -11,6 +11,13 @@ import { GetTransactionById } from '@application/use-cases/transactions/GetTrans
 import { GetAllTransactions } from '@application/use-cases/transactions/GetAllTransactions';
 import { UpdateTransaction } from '@application/use-cases/transactions/UpdateTransaction';
 import { DeleteTransaction } from '@application/use-cases/transactions/DeleteTransaction';
+import { validate } from '@infrastructure/http/middleware/validate';
+import { 
+  CreateTransferSchema, 
+  CreateIncomeSchema, 
+  CreateExpenseSchema,
+  UpdateTransactionSchema 
+} from '@infrastructure/http/schemas/TransactionSchemas';
 
 export function createTransactionRoutes(dataSource: DataSource): Router {
   const router = Router();
@@ -53,7 +60,7 @@ export function createTransactionRoutes(dataSource: DataSource): Router {
   });
 
   // POST /transactions/transfer - Create transfer
-  router.post('/transfer', async (req: Request, res: Response) => {
+  router.post('/transfer', validate(CreateTransferSchema), async (req: Request, res: Response) => {
     try {
       const useCase = new CreateTransfer(transactionRepo, accountRepo);
       const result = await useCase.execute(req.body);
@@ -68,7 +75,7 @@ export function createTransactionRoutes(dataSource: DataSource): Router {
   });
 
   // POST /transactions/income - Create income
-  router.post('/income', async (req: Request, res: Response) => {
+  router.post('/income', validate(CreateIncomeSchema), async (req: Request, res: Response) => {
     try {
       const useCase = new CreateIncome(
         transactionRepo, 
@@ -88,7 +95,7 @@ export function createTransactionRoutes(dataSource: DataSource): Router {
   });
 
   // POST /transactions/expense - Create expense
-  router.post('/expense', async (req: Request, res: Response) => {
+  router.post('/expense', validate(CreateExpenseSchema), async (req: Request, res: Response) => {
     try {
       const useCase = new CreateExpense(
         transactionRepo, 
@@ -108,7 +115,7 @@ export function createTransactionRoutes(dataSource: DataSource): Router {
   });
 
   // PUT /transactions/:id - Update transaction
-  router.put('/:id', async (req: Request, res: Response) => {
+  router.put('/:id', validate(UpdateTransactionSchema), async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
       if (!id) {
