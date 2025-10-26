@@ -8,13 +8,15 @@ import { GetCategoriesByGroup } from '@application/use-cases/categories/GetCateg
 import { UpdateCategory } from '@application/use-cases/categories/UpdateCategory';
 import { MoveCategoryToGroup } from '@application/use-cases/categories/MoveCategoryToGroup';
 import { DeleteCategory } from '@application/use-cases/categories/DeleteCategory';
+import { validate } from '@infrastructure/http/middleware/validate';
+import { CreateCategorySchema, UpdateCategorySchema, MoveCategorySchema } from '@infrastructure/http/schemas/CategorySchemas';
 
 export function createCategoryRoutes(dataSource: DataSource): Router {
   const router = Router();
   const categoryRepo = new CategoryRepository(dataSource);
 
   // POST /categories - Create new category
-  router.post('/', async (req: Request, res: Response) => {
+  router.post('/', validate(CreateCategorySchema), async (req: Request, res: Response) => {
     try {
       const useCase = new CreateCategory(categoryRepo);
       const result = await useCase.execute(req.body);
@@ -40,7 +42,6 @@ export function createCategoryRoutes(dataSource: DataSource): Router {
   });
 
   // GET /categories/by-group/:groupId - Get categories by group
-  // Special route BEFORE /:id to avoid conflict
   router.get('/by-group/:groupId', async (req: Request, res: Response) => {
     try {
       const { groupId } = req.params;
@@ -81,7 +82,7 @@ export function createCategoryRoutes(dataSource: DataSource): Router {
   });
 
   // PUT /categories/:id - Update category
-  router.put('/:id', async (req: Request, res: Response) => {
+  router.put('/:id', validate(UpdateCategorySchema), async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
       if (!id) {
@@ -110,7 +111,7 @@ export function createCategoryRoutes(dataSource: DataSource): Router {
   });
 
   // POST /categories/:id/move - Move category to group
-  router.post('/:id/move', async (req: Request, res: Response) => {
+  router.post('/:id/move', validate(MoveCategorySchema), async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
       if (!id) {

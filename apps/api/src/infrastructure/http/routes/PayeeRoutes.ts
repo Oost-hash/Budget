@@ -6,13 +6,15 @@ import { GetAllPayees } from '@application/use-cases/payees/GetAllPayees';
 import { GetPayee } from '@application/use-cases/payees/GetPayee';
 import { UpdatePayee } from '@application/use-cases/payees/UpdatePayee';
 import { DeletePayee } from '@application/use-cases/payees/DeletePayee';
+import { validate } from '@infrastructure/http/middleware/validate';
+import { CreatePayeeSchema, UpdatePayeeSchema } from '@infrastructure/http/schemas/PayeeSchemas';
 
 export function createPayeeRoutes(dataSource: DataSource): Router {
   const router = Router();
   const payeeRepo = new PayeeRepository(dataSource);
 
   // POST /payees - Create new payee
-  router.post('/', async (req: Request, res: Response) => {
+  router.post('/', validate(CreatePayeeSchema), async (req: Request, res: Response) => {
     try {
       const useCase = new CreatePayee(payeeRepo);
       const result = await useCase.execute(req.body);
@@ -59,7 +61,7 @@ export function createPayeeRoutes(dataSource: DataSource): Router {
   });
 
   // PUT /payees/:id - Update payee
-  router.put('/:id', async (req: Request, res: Response) => {
+  router.put('/:id', validate(UpdatePayeeSchema), async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
       if (!id) {

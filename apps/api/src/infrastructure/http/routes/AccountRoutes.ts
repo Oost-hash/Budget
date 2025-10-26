@@ -6,16 +6,19 @@ import { GetAllAccounts } from '@application/use-cases/accounts/GetAllAccounts';
 import { GetAccount } from '@application/use-cases/accounts/GetAccount';
 import { UpdateAccount } from '@application/use-cases/accounts/UpdateAccount';
 import { DeleteAccount } from '@application/use-cases/accounts/DeleteAccount';
+import { validate } from '@infrastructure/http/middleware/validate';
+import { CreateAccountSchema, UpdateAccountSchema } from '@infrastructure/http/schemas/AccountSchemas';
 
 export function createAccountRoutes(dataSource: DataSource): Router {
   const router = Router();
   const accountRepo = new AccountRepository(dataSource);
 
   // POST /accounts - Create new account
-  router.post('/', async (req: Request, res: Response) => {
+  // 🛡️ Validates request body against CreateAccountSchema before reaching use case
+  router.post('/', validate(CreateAccountSchema), async (req: Request, res: Response) => {
     try {
       const useCase = new CreateAccount(accountRepo);
-      const result = await useCase.execute(req.body);
+      const result = await useCase.execute(req.body); // req.body is now validated & type-safe
       res.status(201).json(result);
     } catch (error) {
       if (error instanceof Error) {
@@ -59,7 +62,8 @@ export function createAccountRoutes(dataSource: DataSource): Router {
   });
 
   // PUT /accounts/:id - Update account
-  router.put('/:id', async (req: Request, res: Response) => {
+  // 🛡️ Validates request body against UpdateAccountSchema before reaching use case
+  router.put('/:id', validate(UpdateAccountSchema), async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
       if (!id) {
@@ -70,7 +74,7 @@ export function createAccountRoutes(dataSource: DataSource): Router {
       const useCase = new UpdateAccount(accountRepo);
       const result = await useCase.execute({
         id,
-        ...req.body
+        ...req.body // req.body is now validated & type-safe
       });
       res.status(200).json(result);
     } catch (error) {
