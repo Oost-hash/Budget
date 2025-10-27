@@ -1,6 +1,7 @@
 import "reflect-metadata";
 import express from "express";
-import cors from "cors";
+import helmet from "helmet";
+import { readRateLimiter, writeRateLimiter } from "@infrastructure/http/middleware/rateLimiter";
 import { DataSource } from "typeorm";
 import { CategoryEntity } from "@infrastructure/database/entities/CategoryEntity";
 import { GroupEntity } from "@infrastructure/database/entities/GroupEntity";
@@ -40,13 +41,33 @@ async function bootstrap() {
   // 2. Express setup
   const app = express();
 
-  // CORS middleware - Allow frontend to call API
-  app.use(cors({
-    origin: 'http://localhost:5173', // Frontend URL
-    credentials: true
+  app.use(helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"], // Tailwind needs inline styles
+        scriptSrc: ["'self'"],
+        imgSrc: ["'self'", "data:", "https:"],
+      },
+    },
+    // Allow cross-origin in development (frontend on different port)
+    // Strict policy in production (everything same origin)
+    crossOriginEmbedderPolicy: process.env.NODE_ENV === 'production',
   }));
 
+  // CORS middleware - Only in development (dynamic import)
+  // In production, frontend and backend served from same origin (no CORS needed)
+  if (process.env.NODE_ENV !== 'production') {
+    const { default: cors } = await import('cors');
+    app.use(cors({
+      origin: 'http://localhost:5173', // Vite dev server
+      credentials: true
+    }));
+  }
+
   app.use(express.json());
+
+  app.use('/api', readRateLimiter);
 
   app.get("/health", (_req, res) => {
     res.json({ status: "ok" });
@@ -54,6 +75,15 @@ async function bootstrap() {
 
   // API Router - all business routes under /api prefix
   const apiRouter = express.Router();
+
+  // Apply write rate limiter to specific HTTP methods
+  apiRouter.use((req, res, next) => {
+    if (['POST', 'PUT', 'DELETE'].includes(req.method)) {
+      writeRateLimiter(req, res, next);
+    } else {
+      next();
+    }
+  });
 
   apiRouter.use("/groups", createGroupRoutes(dataSource));
   apiRouter.use("/categories", createCategoryRoutes(dataSource));
