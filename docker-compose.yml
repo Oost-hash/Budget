@@ -8,14 +8,27 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      # Hot reload - mount source code
       - ./apps/api/src:/app/src
-      # Persistent database
       - ./apps/api/data:/app/data
-      # Don't overwrite node_modules
       - /app/node_modules
     environment:
+      # Application
       - NODE_ENV=development
+      - PORT=3000
+      
+      # Database
+      - DB_PATH=/app/data/budget.sqlite
+      - DB_SYNCHRONIZE=true
+      - DB_LOGGING=true
+      
+      # CORS (development only)
+      - CORS_ORIGINS=http://localhost:5173
+      
+      # Rate Limiting (optional - has defaults)
+      - RATE_LIMIT_READ_WINDOW_MS=900000
+      - RATE_LIMIT_READ_MAX=1000
+      - RATE_LIMIT_WRITE_WINDOW_MS=900000
+      - RATE_LIMIT_WRITE_MAX=100
     restart: unless-stopped
 
   # Frontend Web service
