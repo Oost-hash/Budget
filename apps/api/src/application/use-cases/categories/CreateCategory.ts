@@ -1,6 +1,7 @@
 import { ICategoryRepository } from '@domain/repositories/ICategoryRepository';
 import { Category } from '@domain/entities/Category';
 import { CategoryDTO } from '@application/dtos/CategoryDTO';
+import { ConflictError } from '@application/errors';
 import { v4 as uuid } from 'uuid';
 
 export interface CreateCategoryInput {
@@ -20,7 +21,7 @@ export class CreateCategory {
       input.groupId
     );
     if (exists) {
-      throw new Error('Category name already exists in this group');
+      throw new ConflictError('Category name already exists in this group');
     }
 
     // 2. Determine position (add to end of group)

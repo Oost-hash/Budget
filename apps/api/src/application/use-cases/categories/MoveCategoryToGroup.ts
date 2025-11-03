@@ -1,5 +1,6 @@
 import { ICategoryRepository } from '@domain/repositories/ICategoryRepository';
 import { CategoryDTO } from '@application/dtos/CategoryDTO';
+import { NotFoundError } from '@application/errors';
 
 export interface MoveCategoryToGroupInput {
   categoryId: string;
@@ -12,40 +13,34 @@ export class MoveCategoryToGroup {
   ) {}
 
   async execute(input: MoveCategoryToGroupInput): Promise<CategoryDTO> {
-    // 1. Find existing category
+    // 1. Find category
     const category = await this.categoryRepo.findById(input.categoryId);
     if (!category) {
-      throw new Error('Category not found');
+      throw new NotFoundError('Category not found');
     }
 
-    // 2. Check if already in target group
-    if (category.groupId === input.targetGroupId) {
-      // Already in target group, nothing to do
-      return CategoryDTO.fromDomain(category);
-    }
-
-    // 3. Move to target group (or remove from group if null)
-    if (input.targetGroupId === null) {
-      category.removeFromGroup();
-    } else {
-      category.assignToGroup(input.targetGroupId);
-    }
-
-    // 4. Set position to end of target group
+    // 2. Get position for target group (add to end)
     let newPosition = 1;
-    if (input.targetGroupId === null) {
-      const categoriesInTarget = await this.categoryRepo.findWithoutGroup();
-      newPosition = categoriesInTarget.length + 1;
+    if (input.targetGroupId) {
+      const existingCategories = await this.categoryRepo.findByGroupId(input.targetGroupId);
+      newPosition = existingCategories.length + 1;
     } else {
-      const categoriesInTarget = await this.categoryRepo.findByGroupId(input.targetGroupId);
-      newPosition = categoriesInTarget.length + 1;
+      const existingCategories = await this.categoryRepo.findWithoutGroup();
+      newPosition = existingCategories.length + 1;
+    }
+
+    // 3. Move category
+    if (input.targetGroupId) {
+      category.assignToGroup(input.targetGroupId);
+    } else {
+      category.removeFromGroup();
     }
     category.changePosition(newPosition);
 
-    // 5. Persist
+    // 4. Persist
     await this.categoryRepo.save(category);
 
-    // 6. Return DTO
+    // 5. Return DTO
     return CategoryDTO.fromDomain(category);
   }
 }
