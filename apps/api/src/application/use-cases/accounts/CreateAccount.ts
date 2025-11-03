@@ -4,6 +4,7 @@ import { AccountDTO } from '@application/dtos/AccountDTO';
 import { Money } from '@domain/value-objects/Money';
 import { IBAN } from '@domain/value-objects/IBAN';
 import { ExpectedPaymentDueDate } from '@domain/value-objects/ExpectedPaymentDueDate';
+import { ConflictError } from '@application/errors';
 import { v4 as uuid } from 'uuid';
 
 export interface CreateAccountInput {
@@ -25,14 +26,14 @@ export class CreateAccount {
     // 1. Validation: Check if name already exists
     const nameExists = await this.accountRepo.existsByName(input.name);
     if (nameExists) {
-      throw new Error('Account name already exists');
+      throw new ConflictError('Account name already exists');
     }
 
     // 2. Validation: Check if IBAN already exists (if provided)
     if (input.iban) {
       const ibanExists = await this.accountRepo.existsByIban(input.iban);
       if (ibanExists) {
-        throw new Error('IBAN already exists');
+        throw new ConflictError('IBAN already exists');
       }
     }
 

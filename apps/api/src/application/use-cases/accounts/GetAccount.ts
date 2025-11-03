@@ -1,5 +1,6 @@
 import { IAccountRepository } from '@domain/repositories/IAccountRepository';
 import { AccountDTO } from '@application/dtos/AccountDTO';
+import { NotFoundError } from '@application/errors';
 
 export interface GetAccountInput {
   id: string;
@@ -16,7 +17,7 @@ export class GetAccount {
 
     // 2. Check if exists
     if (!account) {
-      throw new Error('Account not found');
+      throw new NotFoundError('Account not found');
     }
 
     // 3. Return DTO
