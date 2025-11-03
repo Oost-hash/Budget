@@ -1,6 +1,7 @@
 import { IGroupRepository } from '@domain/repositories/IGroupRepository';
 import { Group } from '@domain/entities/Group';
 import { GroupDTO } from '@application/dtos/GroupDTO';
+import { ConflictError } from '@application/errors';
 import { v4 as uuid } from 'uuid';
 
 export interface CreateGroupInput {
@@ -16,7 +17,7 @@ export class CreateGroup {
     // 1. Validation: Check if name already exists
     const exists = await this.groupRepo.existsByName(input.name);
     if (exists) {
-      throw new Error('Group name already exists');
+      throw new ConflictError('Group name already exists');
     }
 
     // 2. Create domain entity

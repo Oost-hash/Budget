@@ -1,5 +1,6 @@
 import { IGroupRepository } from '@domain/repositories/IGroupRepository';
 import { GroupDTO } from '@application/dtos/GroupDTO';
+import { NotFoundError } from '@application/errors';
 
 export interface GetGroupInput {
   id: string;
@@ -16,7 +17,7 @@ export class GetGroup {
 
     // 2. Check if exists
     if (!group) {
-      throw new Error('Group not found');
+      throw new NotFoundError('Group not found');
     }
 
     // 3. Return DTO
