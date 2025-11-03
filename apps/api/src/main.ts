@@ -1,8 +1,9 @@
 import "reflect-metadata";
 import express from "express";
 import helmet from "helmet";
-import { readRateLimiter, writeRateLimiter } from "@infrastructure/http/middleware/rateLimiter";
 import { DataSource } from "typeorm";
+import { config, validateConfig } from "./config";
+import { createReadRateLimiter, createWriteRateLimiter } from "@infrastructure/http/middleware/rateLimiter";
 import { CategoryEntity } from "@infrastructure/database/entities/CategoryEntity";
 import { GroupEntity } from "@infrastructure/database/entities/GroupEntity";
 import { AccountEntity } from "@infrastructure/database/entities/AccountEntity";
@@ -18,12 +19,15 @@ import { createRuleRoutes } from "@infrastructure/http/routes/RuleRoutes";
 import { createTransactionRoutes } from "@infrastructure/http/routes/TransactionRoutes";
 
 async function bootstrap() {
+  // Validate configuration
+  validateConfig();
+
   // 1. Database setup
   const dataSource = new DataSource({
     type: "better-sqlite3",
-    database: "./data/budget.sqlite",
-    synchronize: true, // TODO: Disable in production, use migrations (Issue #15)
-    logging: true,     // TODO: Disable in production (Issue #15)
+    database: config.database.path,
+    synchronize: config.database.synchronize,
+    logging: config.database.logging,
     entities: [
       CategoryEntity,
       GroupEntity,
@@ -50,22 +54,23 @@ async function bootstrap() {
         imgSrc: ["'self'", "data:", "https:"],
       },
     },
-    // Allow cross-origin in development (frontend on different port)
-    // Strict policy in production (everything same origin)
-    crossOriginEmbedderPolicy: process.env.NODE_ENV === 'production',
+    crossOriginEmbedderPolicy: config.isProduction,
   }));
 
-  // CORS middleware - Only in development (dynamic import)
-  // In production, frontend and backend served from same origin (no CORS needed)
-  if (process.env.NODE_ENV !== 'production') {
+  // CORS middleware - Only in development
+  if (config.isDevelopment) {
     const { default: cors } = await import('cors');
     app.use(cors({
-      origin: 'http://localhost:5173', // Vite dev server
+      origin: config.cors.origins,
       credentials: true
     }));
   }
 
   app.use(express.json());
+
+  // 3. Rate limiting - use config values
+  const readRateLimiter = createReadRateLimiter(config.rateLimit.read);
+  const writeRateLimiter = createWriteRateLimiter(config.rateLimit.write);
 
   app.use('/api', readRateLimiter);
 
@@ -96,13 +101,10 @@ async function bootstrap() {
   app.use("/api", apiRouter);
 
   // 4. Static files (production only)
-  // In production, the frontend build will be in /app/public
-  // In development, Vite dev server handles this
-  if (process.env.NODE_ENV === 'production') {
+  if (config.isProduction) {
     const path = require('path');
     const publicPath = path.join(__dirname, '../public');
 
-    // Serve static files
     app.use(express.static(publicPath));
 
     // SPA fallback - send index.html for all non-API routes
@@ -112,13 +114,14 @@ async function bootstrap() {
   }
 
   // 5. Start server
-  const port = 3000;
-  app.listen(port, () => {
-    console.log(`🚀 Server running on http://localhost:${port}`);
+  app.listen(config.port, () => {
+    console.log(`✅ Server running on http://localhost:${config.port}`);
+    console.log(`📊 Environment: ${config.env}`);
+    console.log(`🗄️  Database: ${config.database.path}`);
   });
 }
 
-bootstrap().catch(err => {
-  console.error("❌ Error:", err);
+bootstrap().catch((error) => {
+  console.error("Failed to start application:", error);
   process.exit(1);
 });
