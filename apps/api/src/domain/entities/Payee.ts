@@ -17,11 +17,6 @@ export class Payee {
         return this._iban;
     }
 
-    create(iban: IBAN | null): Payee {
-        const id = crypto.randomUUID();
-        return new Payee(id, this._name, iban);
-    }
-
     rename(newName: string): void {
         this.validateName(newName);
         this._name = newName;
