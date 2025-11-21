@@ -3,6 +3,7 @@ import { ICategoryRepository } from '@domain/repositories/ICategoryRepository';
 import { RuleDTO } from '@application/dtos/RuleDTO';
 import { Money } from '@domain/value-objects/Money';
 import { Frequency } from '@domain/value-objects/Frequency';
+import { NotFoundError } from '@application/errors';
 
 export interface UpdateRuleInput {
   id: string;
@@ -25,14 +26,14 @@ export class UpdateRule {
     // 1. Find existing rule
     const rule = await this.ruleRepo.findById(input.id);
     if (!rule) {
-      throw new Error('Rule not found');
+      throw new NotFoundError('Rule not found');
     }
 
     // 2. Validate category if provided
     if (input.category_id !== undefined && input.category_id !== null) {
       const category = await this.categoryRepo.findById(input.category_id);
       if (!category) {
-        throw new Error('Category not found');
+        throw new NotFoundError('Category not found');
       }
     }
 

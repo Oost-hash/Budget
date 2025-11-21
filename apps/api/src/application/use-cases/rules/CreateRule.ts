@@ -5,6 +5,7 @@ import { Rule } from '@domain/entities/Rule';
 import { RuleDTO } from '@application/dtos/RuleDTO';
 import { Money } from '@domain/value-objects/Money';
 import { Frequency } from '@domain/value-objects/Frequency';
+import { NotFoundError } from '@application/errors';
 import { v4 as uuid } from 'uuid';
 
 export interface CreateRuleInput {
@@ -29,14 +30,14 @@ export class CreateRule {
     // 1. Validation: Check if payee exists
     const payeeExists = await this.payeeRepo.findById(input.payee_id);
     if (!payeeExists) {
-      throw new Error('Payee not found');
+      throw new NotFoundError('Payee not found');
     }
 
     // 2. Validation: Check if category exists (if provided)
     if (input.category_id) {
       const categoryExists = await this.categoryRepo.findById(input.category_id);
       if (!categoryExists) {
-        throw new Error('Category not found');
+        throw new NotFoundError('Category not found');
       }
     }
 

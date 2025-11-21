@@ -1,4 +1,5 @@
 import { IRuleRepository } from '@domain/repositories/IRuleRepository';
+import { NotFoundError } from '@application/errors';
 
 export interface DeleteRuleInput {
   id: string;
@@ -13,7 +14,7 @@ export class DeleteRule {
     // 1. Check if rule exists
     const rule = await this.ruleRepo.findById(input.id);
     if (!rule) {
-      throw new Error('Rule not found');
+      throw new NotFoundError('Rule not found');
     }
 
     // 2. Delete rule
