@@ -38,3 +38,7 @@ apps/web/public/favicon-*.png
 apps/web/public/apple-touch-icon.png
 apps/web/public/android-chrome-*.png
 apps/web/public/logo-256.png
+
+# AI context files
+CLAUDE.md
+.claude/

@@ -1,5 +1,6 @@
 import { IPayeeRepository } from '@domain/repositories/IPayeeRepository';
 import { PayeeDTO } from '@application/dtos/PayeeDTO';
+import { NotFoundError } from '@application/errors';
 
 export interface GetPayeeInput {
   id: string;
@@ -16,7 +17,7 @@ export class GetPayee {
 
     // 2. Check if exists
     if (!payee) {
-      throw new Error('Payee not found');
+      throw new NotFoundError('Payee not found');
     }
 
     // 3. Return DTO

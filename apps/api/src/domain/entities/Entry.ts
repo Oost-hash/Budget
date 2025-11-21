@@ -1,4 +1,5 @@
 import { Money } from "@domain/value-objects/Money";
+import { DomainError } from "@domain/errors";
 
 export class Entry {
     constructor(
@@ -21,7 +22,7 @@ export class Entry {
 
     private validateAmount(amount: Money): void {
         if (amount.isZero()) {
-            throw new Error('Entry amount cannot be zero');
+            throw new DomainError('Entry amount cannot be zero');
         }
     }
 }

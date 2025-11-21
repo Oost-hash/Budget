@@ -1,5 +1,6 @@
 import { ICategoryRepository } from '@domain/repositories/ICategoryRepository';
 import { CategoryDTO } from '@application/dtos/CategoryDTO';
+import { NotFoundError } from '@application/errors';
 
 export interface GetCategoryInput {
   id: string;
@@ -16,7 +17,7 @@ export class GetCategory {
 
     // 2. Check if exists
     if (!category) {
-      throw new Error('Category not found');
+      throw new NotFoundError('Category not found');
     }
 
     // 3. Return DTO

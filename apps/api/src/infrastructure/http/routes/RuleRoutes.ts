@@ -1,4 +1,4 @@
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import { DataSource } from 'typeorm';
 import { RuleRepository } from '@infrastructure/repositories/RuleRepository';
 import { PayeeRepository } from '@infrastructure/repositories/PayeeRepository';
@@ -20,44 +20,40 @@ export function createRuleRoutes(dataSource: DataSource): Router {
   const categoryRepo = new CategoryRepository(dataSource);
 
   // POST /rules - Create new rule
-  router.post('/', validate(CreateRuleSchema), async (req: Request, res: Response) => {
+  router.post('/', validate(CreateRuleSchema), async (req: Request, res: Response, next: NextFunction) => {
     try {
       const useCase = new CreateRule(ruleRepo, payeeRepo, categoryRepo);
       const result = await useCase.execute(req.body);
       res.status(201).json(result);
     } catch (error) {
-      if (error instanceof Error) {
-        res.status(400).json({ error: error.message });
-      } else {
-        res.status(500).json({ error: 'Internal server error' });
-      }
+      next(error);
     }
   });
 
   // GET /rules - Get all rules
-  router.get('/', async (_req: Request, res: Response) => {
+  router.get('/', async (_req: Request, res: Response, next: NextFunction) => {
     try {
       const useCase = new GetAllRules(ruleRepo);
       const result = await useCase.execute();
       res.status(200).json(result);
     } catch (error) {
-      res.status(500).json({ error: 'Internal server error' });
+      next(error);
     }
   });
 
   // GET /rules/recurring - Get all recurring rules
-  router.get('/recurring', async (_req: Request, res: Response) => {
+  router.get('/recurring', async (_req: Request, res: Response, next: NextFunction) => {
     try {
       const useCase = new GetRecurringRules(ruleRepo);
       const result = await useCase.execute();
       res.status(200).json(result);
     } catch (error) {
-      res.status(500).json({ error: 'Internal server error' });
+      next(error);
     }
   });
 
   // GET /rules/payee/:payeeId - Get rules by payee
-  router.get('/payee/:payeeId', async (req: Request, res: Response) => {
+  router.get('/payee/:payeeId', async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { payeeId } = req.params;
       if (!payeeId) {
@@ -74,12 +70,12 @@ export function createRuleRoutes(dataSource: DataSource): Router {
       });
       res.status(200).json(result);
     } catch (error) {
-      res.status(500).json({ error: 'Internal server error' });
+      next(error);
     }
   });
 
   // GET /rules/:id - Get single rule
-  router.get('/:id', async (req: Request, res: Response) => {
+  router.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
       if (!id) {
@@ -91,16 +87,12 @@ export function createRuleRoutes(dataSource: DataSource): Router {
       const result = await useCase.execute({ id });
       res.status(200).json(result);
     } catch (error) {
-      if (error instanceof Error && error.message === 'Rule not found') {
-        res.status(404).json({ error: error.message });
-      } else {
-        res.status(500).json({ error: 'Internal server error' });
-      }
+      next(error);
     }
   });
 
   // PUT /rules/:id - Update rule
-  router.put('/:id', validate(UpdateRuleSchema), async (req: Request, res: Response) => {
+  router.put('/:id', validate(UpdateRuleSchema), async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
       if (!id) {
@@ -112,20 +104,12 @@ export function createRuleRoutes(dataSource: DataSource): Router {
       const result = await useCase.execute({ id, ...req.body });
       res.status(200).json(result);
     } catch (error) {
-      if (error instanceof Error) {
-        if (error.message === 'Rule not found') {
-          res.status(404).json({ error: error.message });
-        } else {
-          res.status(400).json({ error: error.message });
-        }
-      } else {
-        res.status(500).json({ error: 'Internal server error' });
-      }
+      next(error);
     }
   });
 
   // DELETE /rules/:id - Delete rule
-  router.delete('/:id', async (req: Request, res: Response) => {
+  router.delete('/:id', async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
       if (!id) {
@@ -137,11 +121,7 @@ export function createRuleRoutes(dataSource: DataSource): Router {
       await useCase.execute({ id });
       res.status(204).send();
     } catch (error) {
-      if (error instanceof Error && error.message === 'Rule not found') {
-        res.status(404).json({ error: error.message });
-      } else {
-        res.status(500).json({ error: 'Internal server error' });
-      }
+      next(error);
     }
   });
 

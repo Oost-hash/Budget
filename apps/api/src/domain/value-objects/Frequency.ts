@@ -1,3 +1,5 @@
+import { DomainError } from '@domain/errors';
+
 export type FrequencyType = 'monthly' | 'weekly' | 'yearly';
 
 export class Frequency {
@@ -5,7 +7,7 @@ export class Frequency {
 
   static create(type: FrequencyType): Frequency {
     if (!['monthly', 'weekly', 'yearly'].includes(type)) {
-      throw new Error('Frequency must be monthly, weekly, or yearly');
+      throw new DomainError('Frequency must be monthly, weekly, or yearly');
     }
     return new Frequency(type);
   }
@@ -55,7 +57,7 @@ export class Frequency {
    */
   getOccurrencesBetween(startDate: Date, endDate: Date): Date[] {
     if (startDate > endDate) {
-      throw new Error('Start date must be before end date');
+      throw new DomainError('Start date must be before end date');
     }
 
     const occurrences: Date[] = [];

@@ -1,5 +1,6 @@
 import { IGroupRepository } from '@domain/repositories/IGroupRepository';
 import { GroupDTO } from '@application/dtos/GroupDTO';
+import { NotFoundError, ConflictError } from '@application/errors';
 
 export interface UpdateGroupInput {
   id: string;
@@ -15,13 +16,13 @@ export class UpdateGroup {
     // 1. Find existing group
     const group = await this.groupRepo.findById(input.id);
     if (!group) {
-      throw new Error('Group not found');
+      throw new NotFoundError('Group not found');
     }
 
     // 2. Validation: Check if new name already exists (on different group)
     const existingGroup = await this.groupRepo.existsByName(input.name);
     if (existingGroup && group.name !== input.name) {
-      throw new Error('Group name already exists');
+      throw new ConflictError('Group name already exists');
     }
 
     // 3. Update domain entity (uses domain validation)

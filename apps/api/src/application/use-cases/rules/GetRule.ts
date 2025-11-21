@@ -1,5 +1,6 @@
 import { IRuleRepository } from '@domain/repositories/IRuleRepository';
 import { RuleDTO } from '@application/dtos/RuleDTO';
+import { NotFoundError } from '@application/errors';
 
 export interface GetRuleInput {
   id: string;
@@ -16,7 +17,7 @@ export class GetRule {
 
     // 2. Check if exists
     if (!rule) {
-      throw new Error('Rule not found');
+      throw new NotFoundError('Rule not found');
     }
 
     // 3. Return DTO

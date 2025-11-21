@@ -1,4 +1,4 @@
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import { DataSource } from 'typeorm';
 import { AccountRepository } from '@infrastructure/repositories/AccountRepository';
 import { CreateAccount } from '@application/use-cases/accounts/CreateAccount';
@@ -14,100 +14,60 @@ export function createAccountRoutes(dataSource: DataSource): Router {
   const accountRepo = new AccountRepository(dataSource);
 
   // POST /accounts - Create new account
-  // 🛡️ Validates request body against CreateAccountSchema before reaching use case
-  router.post('/', validate(CreateAccountSchema), async (req: Request, res: Response) => {
+  router.post('/', validate(CreateAccountSchema), async (req: Request, res: Response, next: NextFunction) => {
     try {
       const useCase = new CreateAccount(accountRepo);
-      const result = await useCase.execute(req.body); // req.body is now validated & type-safe
+      const result = await useCase.execute(req.body);
       res.status(201).json(result);
     } catch (error) {
-      if (error instanceof Error) {
-        res.status(400).json({ error: error.message });
-      } else {
-        res.status(500).json({ error: 'Internal server error' });
-      }
+      next(error);
     }
   });
 
   // GET /accounts - Get all accounts
-  router.get('/', async (_req: Request, res: Response) => {
+  router.get('/', async (_req: Request, res: Response, next: NextFunction) => {
     try {
       const useCase = new GetAllAccounts(accountRepo);
       const result = await useCase.execute();
       res.status(200).json(result);
     } catch (error) {
-      res.status(500).json({ error: 'Internal server error' });
+      next(error);
     }
   });
 
   // GET /accounts/:id - Get single account
-  router.get('/:id', async (req: Request, res: Response) => {
+  router.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
-      if (!id) {
-        res.status(400).json({ error: 'ID is required' });
-        return;
-      }
-
       const useCase = new GetAccount(accountRepo);
-      const result = await useCase.execute({ id });
+      const result = await useCase.execute({ id: id as string }); // ✅ Type assertion
       res.status(200).json(result);
     } catch (error) {
-      if (error instanceof Error && error.message === 'Account not found') {
-        res.status(404).json({ error: error.message });
-      } else {
-        res.status(500).json({ error: 'Internal server error' });
-      }
+      next(error);
     }
   });
 
   // PUT /accounts/:id - Update account
-  // 🛡️ Validates request body against UpdateAccountSchema before reaching use case
-  router.put('/:id', validate(UpdateAccountSchema), async (req: Request, res: Response) => {
+  router.put('/:id', validate(UpdateAccountSchema), async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
-      if (!id) {
-        res.status(400).json({ error: 'ID is required' });
-        return;
-      }
-
       const useCase = new UpdateAccount(accountRepo);
-      const result = await useCase.execute({
-        id,
-        ...req.body // req.body is now validated & type-safe
-      });
+      const result = await useCase.execute({ id: id as string, ...req.body }); // ✅ Type assertion
       res.status(200).json(result);
     } catch (error) {
-      if (error instanceof Error) {
-        if (error.message === 'Account not found') {
-          res.status(404).json({ error: error.message });
-        } else {
-          res.status(400).json({ error: error.message });
-        }
-      } else {
-        res.status(500).json({ error: 'Internal server error' });
-      }
+      next(error);
     }
   });
 
   // DELETE /accounts/:id - Delete account
-  router.delete('/:id', async (req: Request, res: Response) => {
+  router.delete('/:id', async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
-      if (!id) {
-        res.status(400).json({ error: 'ID is required' });
-        return;
-      }
-
       const useCase = new DeleteAccount(accountRepo);
-      await useCase.execute({ id });
+      await useCase.execute({ id: id as string }); // ✅ Type assertion
       res.status(204).send();
     } catch (error) {
-      if (error instanceof Error && error.message === 'Account not found') {
-        res.status(404).json({ error: error.message });
-      } else {
-        res.status(500).json({ error: 'Internal server error' });
-      }
+      next(error);
     }
   });
 

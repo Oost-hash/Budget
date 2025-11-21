@@ -5,7 +5,6 @@ import { Account } from '@domain/entities/Account';
 import { AccountEntity } from '../database/entities/AccountEntity';
 import { Money } from '@domain/value-objects/Money';
 import { IBAN } from '@domain/value-objects/IBAN';
-import { ExpectedPaymentDueDate } from '@domain/value-objects/ExpectedPaymentDueDate';
 
 describe('AccountRepository', () => {
   let dataSource: DataSource;
@@ -110,7 +109,6 @@ describe('AccountRepository', () => {
 
     test('should save liability account with payment due date', async () => {
       // Arrange
-      const dueDate = ExpectedPaymentDueDate.create(15, 'before');
       const account = new Account(
         'acc-1',
         'Credit Card',
@@ -119,7 +117,6 @@ describe('AccountRepository', () => {
         false,
         Money.fromAmount(0),
         Money.fromAmount(5000),
-        dueDate
       );
 
       // Act
@@ -129,8 +126,6 @@ describe('AccountRepository', () => {
       // Assert
       expect(found?.type).toBe('liability');
       expect(found?.creditLimit.amount).toBe(5000);
-      expect(found?.paymentDueDate?.getDayOfMonth()).toBe(15);
-      expect(found?.paymentDueDate?.getShiftDirection()).toBe('before');
     });
   });
 

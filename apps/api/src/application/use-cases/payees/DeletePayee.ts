@@ -1,4 +1,5 @@
 import { IPayeeRepository } from '@domain/repositories/IPayeeRepository';
+import { NotFoundError } from '@application/errors';
 
 export interface DeletePayeeInput {
   id: string;
@@ -13,7 +14,7 @@ export class DeletePayee {
     // 1. Check if payee exists
     const payee = await this.payeeRepo.findById(input.id);
     if (!payee) {
-      throw new Error('Payee not found');
+      throw new NotFoundError('Payee not found');
     }
 
     // 2. Delete payee

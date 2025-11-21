@@ -3,7 +3,7 @@ import { Account } from '@domain/entities/Account';
 import { AccountDTO } from '@application/dtos/AccountDTO';
 import { Money } from '@domain/value-objects/Money';
 import { IBAN } from '@domain/value-objects/IBAN';
-import { ExpectedPaymentDueDate } from '@domain/value-objects/ExpectedPaymentDueDate';
+import { ConflictError } from '@application/errors';
 import { v4 as uuid } from 'uuid';
 
 export interface CreateAccountInput {
@@ -13,7 +13,6 @@ export interface CreateAccountInput {
   isSavings?: boolean;
   overdraftLimit?: { amount: number; currency?: string };
   creditLimit?: { amount: number; currency?: string };
-  paymentDueDate?: { dayOfMonth: number; shiftDirection: 'before' | 'after' | 'none' } | null;
 }
 
 export class CreateAccount {
@@ -25,14 +24,14 @@ export class CreateAccount {
     // 1. Validation: Check if name already exists
     const nameExists = await this.accountRepo.existsByName(input.name);
     if (nameExists) {
-      throw new Error('Account name already exists');
+      throw new ConflictError('Account name already exists');
     }
 
     // 2. Validation: Check if IBAN already exists (if provided)
     if (input.iban) {
       const ibanExists = await this.accountRepo.existsByIban(input.iban);
       if (ibanExists) {
-        throw new Error('IBAN already exists');
+        throw new ConflictError('IBAN already exists');
       }
     }
 
@@ -46,10 +45,6 @@ export class CreateAccount {
     const creditLimit = input.creditLimit
       ? Money.fromAmount(input.creditLimit.amount, input.creditLimit.currency)
       : Money.fromAmount(0);
-    
-    const paymentDueDate = input.paymentDueDate
-      ? ExpectedPaymentDueDate.create(input.paymentDueDate.dayOfMonth, input.paymentDueDate.shiftDirection)
-      : null;
 
     // 4. Create domain entity
     const account = new Account(
@@ -59,8 +54,7 @@ export class CreateAccount {
       iban,
       input.isSavings ?? false,
       overdraftLimit,
-      creditLimit,
-      paymentDueDate
+      creditLimit
     );
 
     // 5. Persist

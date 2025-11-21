@@ -1,4 +1,4 @@
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import { DataSource } from 'typeorm';
 import { CategoryRepository } from '@infrastructure/repositories/CategoryRepository';
 import { CreateCategory } from '@application/use-cases/categories/CreateCategory';
@@ -16,146 +16,93 @@ export function createCategoryRoutes(dataSource: DataSource): Router {
   const categoryRepo = new CategoryRepository(dataSource);
 
   // POST /categories - Create new category
-  router.post('/', validate(CreateCategorySchema), async (req: Request, res: Response) => {
+  router.post('/', validate(CreateCategorySchema), async (req: Request, res: Response, next: NextFunction) => {
     try {
       const useCase = new CreateCategory(categoryRepo);
       const result = await useCase.execute(req.body);
       res.status(201).json(result);
     } catch (error) {
-      if (error instanceof Error) {
-        res.status(400).json({ error: error.message });
-      } else {
-        res.status(500).json({ error: 'Internal server error' });
-      }
+      next(error);
     }
   });
 
   // GET /categories - Get all categories
-  router.get('/', async (_req: Request, res: Response) => {
+  router.get('/', async (_req: Request, res: Response, next: NextFunction) => {
     try {
       const useCase = new GetAllCategories(categoryRepo);
       const result = await useCase.execute();
       res.status(200).json(result);
     } catch (error) {
-      res.status(500).json({ error: 'Internal server error' });
+      next(error);
     }
   });
 
   // GET /categories/by-group/:groupId - Get categories by group
-  router.get('/by-group/:groupId', async (req: Request, res: Response) => {
+  router.get('/by-group/:groupId', async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { groupId } = req.params;
-      if (!groupId) {
-        res.status(400).json({ error: 'Group ID is required' });
-        return;
-      }
-
       const useCase = new GetCategoriesByGroup(categoryRepo);
       const result = await useCase.execute({
-        groupId: groupId === 'null' ? null : groupId
+        groupId: groupId === 'null' ? null : groupId as string
       });
       res.status(200).json(result);
     } catch (error) {
-      res.status(500).json({ error: 'Internal server error' });
+      next(error);
     }
   });
 
   // GET /categories/:id - Get single category
-  router.get('/:id', async (req: Request, res: Response) => {
+  router.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
-      if (!id) {
-        res.status(400).json({ error: 'ID is required' });
-        return;
-      }
-
       const useCase = new GetCategory(categoryRepo);
-      const result = await useCase.execute({ id });
+      const result = await useCase.execute({ id: id as string });
       res.status(200).json(result);
     } catch (error) {
-      if (error instanceof Error && error.message === 'Category not found') {
-        res.status(404).json({ error: error.message });
-      } else {
-        res.status(500).json({ error: 'Internal server error' });
-      }
+      next(error);
     }
   });
 
   // PUT /categories/:id - Update category
-  router.put('/:id', validate(UpdateCategorySchema), async (req: Request, res: Response) => {
+  router.put('/:id', validate(UpdateCategorySchema), async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
-      if (!id) {
-        res.status(400).json({ error: 'ID is required' });
-        return;
-      }
-
       const useCase = new UpdateCategory(categoryRepo);
       const result = await useCase.execute({
-        id,
+        id: id as string,
         name: req.body.name,
         position: req.body.position
       });
       res.status(200).json(result);
     } catch (error) {
-      if (error instanceof Error) {
-        if (error.message === 'Category not found') {
-          res.status(404).json({ error: error.message });
-        } else {
-          res.status(400).json({ error: error.message });
-        }
-      } else {
-        res.status(500).json({ error: 'Internal server error' });
-      }
+      next(error);
     }
   });
 
   // POST /categories/:id/move - Move category to group
-  router.post('/:id/move', validate(MoveCategorySchema), async (req: Request, res: Response) => {
+  router.post('/:id/move', validate(MoveCategorySchema), async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
-      if (!id) {
-        res.status(400).json({ error: 'ID is required' });
-        return;
-      }
-
       const useCase = new MoveCategoryToGroup(categoryRepo);
       const result = await useCase.execute({
-        categoryId: id,
+        categoryId: id as string,
         targetGroupId: req.body.targetGroupId
       });
       res.status(200).json(result);
     } catch (error) {
-      if (error instanceof Error) {
-        if (error.message === 'Category not found') {
-          res.status(404).json({ error: error.message });
-        } else {
-          res.status(400).json({ error: error.message });
-        }
-      } else {
-        res.status(500).json({ error: 'Internal server error' });
-      }
+      next(error);
     }
   });
 
   // DELETE /categories/:id - Delete category
-  router.delete('/:id', async (req: Request, res: Response) => {
+  router.delete('/:id', async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
-      if (!id) {
-        res.status(400).json({ error: 'ID is required' });
-        return;
-      }
-
       const useCase = new DeleteCategory(categoryRepo);
-      await useCase.execute({ id });
+      await useCase.execute({ id: id as string });
       res.status(204).send();
     } catch (error) {
-      if (error instanceof Error && error.message === 'Category not found') {
-        res.status(404).json({ error: error.message });
-      } else {
-        res.status(500).json({ error: 'Internal server error' });
-      }
+      next(error);
     }
   });
 

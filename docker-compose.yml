@@ -10,6 +10,7 @@ services:
     volumes:
       - ./apps/api/src:/app/src
       - ./apps/api/data:/app/data
+      - ./apps/api/vitest.config.ts:/app/vitest.config.ts
       - /app/node_modules
     environment:
       # Application

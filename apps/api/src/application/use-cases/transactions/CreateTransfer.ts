@@ -3,6 +3,7 @@ import { IAccountRepository } from '@domain/repositories/IAccountRepository';
 import { Transaction } from '@domain/entities/Transaction';
 import { Money } from '@domain/value-objects/Money';
 import { TransactionDTO } from '@application/dtos/TransactionDTO';
+import { NotFoundError, ValidationError } from '@application/errors';
 import { randomUUID } from 'crypto';
 
 export interface CreateTransferInput {
@@ -24,17 +25,17 @@ export class CreateTransfer {
     // 1. Validate accounts exist
     const fromAccount = await this.accountRepo.findById(input.fromAccountId);
     if (!fromAccount) {
-      throw new Error('From account not found');
+      throw new NotFoundError('From account not found');
     }
 
     const toAccount = await this.accountRepo.findById(input.toAccountId);
     if (!toAccount) {
-      throw new Error('To account not found');
+      throw new NotFoundError('To account not found');
     }
 
     // 2. Validate same account transfer
     if (input.fromAccountId === input.toAccountId) {
-      throw new Error('Cannot transfer to the same account');
+      throw new ValidationError('Cannot transfer to the same account');
     }
 
     // 3. Create money value object

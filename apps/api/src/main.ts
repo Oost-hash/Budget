@@ -4,19 +4,26 @@ import helmet from "helmet";
 import { DataSource } from "typeorm";
 import { config, validateConfig } from "./config";
 import { createReadRateLimiter, createWriteRateLimiter } from "@infrastructure/http/middleware/rateLimiter";
-import { CategoryEntity } from "@infrastructure/database/entities/CategoryEntity";
-import { GroupEntity } from "@infrastructure/database/entities/GroupEntity";
-import { AccountEntity } from "@infrastructure/database/entities/AccountEntity";
-import { PayeeEntity } from "@infrastructure/database/entities/PayeeEntity";
-import { RuleEntity } from "@infrastructure/database/entities/RuleEntity";
-import { TransactionEntity } from "@infrastructure/database/entities/TransactionEntity";
-import { EntryEntity } from "@infrastructure/database/entities/EntryEntity";
-import { createGroupRoutes } from "@infrastructure/http/routes/GroupRoutes";
-import { createCategoryRoutes } from "@infrastructure/http/routes/CategoryRoutes";
-import { createAccountRoutes } from "@infrastructure/http/routes/AccountRoutes";
-import { createPayeeRoutes } from "@infrastructure/http/routes/PayeeRoutes";
-import { createRuleRoutes } from "@infrastructure/http/routes/RuleRoutes";
-import { createTransactionRoutes } from "@infrastructure/http/routes/TransactionRoutes";
+import { errorHandler } from "@infrastructure/http/middleware/errorHandler";
+
+import {
+  CategoryEntity,
+  GroupEntity,
+  AccountEntity,
+  PayeeEntity,
+  RuleEntity,
+  TransactionEntity,
+  EntryEntity,
+} from "@infrastructure/database/entities";
+
+import {
+  createGroupRoutes,
+  createCategoryRoutes,
+  createAccountRoutes,
+  createPayeeRoutes,
+  createRuleRoutes,
+  createTransactionRoutes,
+} from "@infrastructure/http/routes";
 
 async function bootstrap() {
   // Validate configuration
@@ -99,6 +106,9 @@ async function bootstrap() {
 
   // Mount API router
   app.use("/api", apiRouter);
+
+  // ✅ CENTRALIZED ERROR HANDLER - Must come AFTER all routes
+  app.use(errorHandler);
 
   // 4. Static files (production only)
   if (config.isProduction) {

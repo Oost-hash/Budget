@@ -1,3 +1,5 @@
+import { DomainError } from '@domain/errors';
+
 export class Money {
   private constructor(
     public readonly amount: number,
@@ -6,13 +8,13 @@ export class Money {
 
   static fromAmount(amount: number, currency: string = 'EUR'): Money {
     if (!Number.isFinite(amount)) {
-      throw new Error('Amount must be a finite number');
+      throw new DomainError('Amount must be a finite number');
     }
-    
+
     if (!currency || currency.length !== 3) {
-      throw new Error('Currency must be a 3-letter ISO 4217 code');
+      throw new DomainError('Currency must be a 3-letter ISO 4217 code');
     }
-    
+
     return new Money(amount, currency.toUpperCase());
   }
 
@@ -28,14 +30,14 @@ export class Money {
 
   multiply(factor: number): Money {
     if (!Number.isFinite(factor)) {
-      throw new Error('Factor must be a finite number');
+      throw new DomainError('Factor must be a finite number');
     }
     return new Money(this.amount * factor, this.currency);
   }
 
   divide(divisor: number): Money {
     if (!Number.isFinite(divisor) || divisor === 0) {
-      throw new Error('Divisor must be a non-zero finite number');
+      throw new DomainError('Divisor must be a non-zero finite number');
     }
     return new Money(this.amount / divisor, this.currency);
   }
@@ -63,7 +65,7 @@ export class Money {
 
   private assertSameCurrency(other: Money): void {
     if (this.currency !== other.currency) {
-      throw new Error(
+      throw new DomainError(
         `Cannot operate on different currencies: ${this.currency} and ${other.currency}`
       );
     }

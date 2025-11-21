@@ -1,4 +1,5 @@
 import { ICategoryRepository } from '@domain/repositories/ICategoryRepository';
+import { NotFoundError } from '@application/errors';
 
 export interface DeleteCategoryInput {
   id: string;
@@ -13,7 +14,7 @@ export class DeleteCategory {
     // 1. Check if category exists
     const category = await this.categoryRepo.findById(input.id);
     if (!category) {
-      throw new Error('Category not found');
+      throw new NotFoundError('Category not found');
     }
 
     // 2. Delete category

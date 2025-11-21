@@ -1,6 +1,5 @@
 import { Money } from '@domain/value-objects/Money';
 import { IBAN } from '@domain/value-objects/IBAN';
-import { ExpectedPaymentDueDate } from '@domain/value-objects/ExpectedPaymentDueDate';
 
 export class Account {
     constructor(
@@ -11,7 +10,6 @@ export class Account {
         private _isSavings: boolean,
         private _overdraftLimit: Money,
         private _creditLimit: Money,
-        private _paymentDueDate: ExpectedPaymentDueDate | null,
     ) {
         this.validateName(_name);
     }
@@ -40,10 +38,6 @@ export class Account {
         return this._creditLimit;
     }
 
-    get paymentDueDate(): ExpectedPaymentDueDate | null {
-        return this._paymentDueDate;
-    }
-
     rename(newName: string): void {
         this.validateName(newName);
         this._name = newName;
@@ -69,10 +63,6 @@ export class Account {
     setCreditLimit(newLimit: Money): void {
         this.validateCreditLimit(newLimit);
         this._creditLimit = newLimit;
-    }
-
-    setPaymentDueDate(dueDate: ExpectedPaymentDueDate | null): void {
-        this._paymentDueDate = dueDate;
     }
 
     private validateName(name: string): void {

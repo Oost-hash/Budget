@@ -1,6 +1,7 @@
 import { IPayeeRepository } from '@domain/repositories/IPayeeRepository';
 import { PayeeDTO } from '@application/dtos/PayeeDTO';
 import { IBAN } from '@domain/value-objects/IBAN';
+import { NotFoundError, ConflictError } from '@application/errors';
 
 export interface UpdatePayeeInput {
   id: string;
@@ -17,7 +18,7 @@ export class UpdatePayee {
     // 1. Find existing payee
     const payee = await this.payeeRepo.findById(input.id);
     if (!payee) {
-      throw new Error('Payee not found');
+      throw new NotFoundError('Payee not found');
     }
 
     // 2. Update name if provided
@@ -25,7 +26,7 @@ export class UpdatePayee {
       // Check if new name already exists (on different payee)
       const nameExists = await this.payeeRepo.existsByName(input.name);
       if (nameExists && payee.name !== input.name) {
-        throw new Error('Payee name already exists');
+        throw new ConflictError('Payee name already exists');
       }
       payee.rename(input.name);
     }
@@ -38,7 +39,7 @@ export class UpdatePayee {
         // Check if new IBAN already exists
         const ibanExists = await this.payeeRepo.existsByIban(input.iban);
         if (ibanExists && payee.iban?.toString() !== input.iban) {
-          throw new Error('IBAN already exists');
+          throw new ConflictError('IBAN already exists');
         }
         payee.changeIban(IBAN.create(input.iban));
       }

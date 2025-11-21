@@ -1,4 +1,5 @@
 import { IAccountRepository } from '@domain/repositories/IAccountRepository';
+import { NotFoundError } from '@application/errors';
 
 export interface DeleteAccountInput {
   id: string;
@@ -13,7 +14,7 @@ export class DeleteAccount {
     // 1. Check if account exists
     const account = await this.accountRepo.findById(input.id);
     if (!account) {
-      throw new Error('Account not found');
+      throw new NotFoundError('Account not found');
     }
 
     // 2. Delete account

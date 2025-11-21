@@ -1,4 +1,5 @@
 import { ITransactionRepository } from '@domain/repositories/ITransactionRepository';
+import { NotFoundError } from '@application/errors';
 
 export interface DeleteTransactionInput {
   id: string;
@@ -13,7 +14,7 @@ export class DeleteTransaction {
     // 1. Check if transaction exists
     const transaction = await this.transactionRepo.findById(input.id);
     if (!transaction) {
-      throw new Error('Transaction not found');
+      throw new NotFoundError('Transaction not found');
     }
 
     // 2. Delete transaction

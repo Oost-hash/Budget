@@ -2,6 +2,7 @@ import { ITransactionRepository } from '@domain/repositories/ITransactionReposit
 import { IPayeeRepository } from '@domain/repositories/IPayeeRepository';
 import { ICategoryRepository } from '@domain/repositories/ICategoryRepository';
 import { TransactionDTO } from '@application/dtos/TransactionDTO';
+import { NotFoundError, ValidationError } from '@application/errors';
 
 export interface UpdateTransactionInput {
   id: string;
@@ -22,7 +23,7 @@ export class UpdateTransaction {
     // 1. Find existing transaction
     const transaction = await this.transactionRepo.findById(input.id);
     if (!transaction) {
-      throw new Error('Transaction not found');
+      throw new NotFoundError('Transaction not found');
     }
 
     // 2. Update date if provided
@@ -39,49 +40,49 @@ export class UpdateTransaction {
     if (input.payeeId !== undefined) {
       // Validate type-specific rules
       if (transaction.type === 'transfer' && input.payeeId !== null) {
-        throw new Error('Transfer cannot have a payee');
+        throw new ValidationError('Transfer cannot have a payee');
       }
 
       if ((transaction.type === 'income' || transaction.type === 'expense') && input.payeeId === null) {
-        throw new Error(`${transaction.type} must have a payee`);
+        throw new ValidationError(`${transaction.type} must have a payee`);
       }
 
       // Validate payee exists (if not null)
       if (input.payeeId !== null) {
         const payee = await this.payeeRepo.findById(input.payeeId);
         if (!payee) {
-          throw new Error('Payee not found');
+          throw new NotFoundError('Payee not found');
         }
       }
 
       // Note: We can't update payeeId directly on the transaction entity
       // This would require adding an updatePayee method or similar
       // For now, we'll throw an error suggesting to delete and recreate
-      throw new Error('Cannot update payee - delete and recreate transaction instead');
+      throw new ValidationError('Cannot update payee - delete and recreate transaction instead');
     }
 
     // 5. Update categoryId if provided (and validate business rules)
     if (input.categoryId !== undefined) {
       // Validate type-specific rules
       if (transaction.type === 'transfer' && input.categoryId !== null) {
-        throw new Error('Transfer cannot have a category');
+        throw new ValidationError('Transfer cannot have a category');
       }
 
       if ((transaction.type === 'income' || transaction.type === 'expense') && input.categoryId === null) {
-        throw new Error(`${transaction.type} must have a category`);
+        throw new ValidationError(`${transaction.type} must have a category`);
       }
 
       // Validate category exists (if not null)
       if (input.categoryId !== null) {
         const category = await this.categoryRepo.findById(input.categoryId);
         if (!category) {
-          throw new Error('Category not found');
+          throw new NotFoundError('Category not found');
         }
       }
 
       // Note: Same issue as payeeId - we'd need to add updateCategory method
       // For now, throw an error
-      throw new Error('Cannot update category - delete and recreate transaction instead');
+      throw new ValidationError('Cannot update category - delete and recreate transaction instead');
     }
 
     // 6. Persist

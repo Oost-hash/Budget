@@ -7,7 +7,6 @@ import { DeleteAccount } from './DeleteAccount';
 import { IAccountRepository } from '@domain/repositories/IAccountRepository';
 import { Account } from '@domain/entities/Account';
 import { Money } from '@domain/value-objects/Money';
-import { ExpectedPaymentDueDate } from '@domain/value-objects/ExpectedPaymentDueDate';
 
 describe('Account Use Cases', () => {
   let mockRepo: IAccountRepository;
@@ -54,14 +53,11 @@ describe('Account Use Cases', () => {
         name: 'Credit Card',
         type: 'liability',
         creditLimit: { amount: 5000 },
-        paymentDueDate: { dayOfMonth: 15, shiftDirection: 'before' }
       });
 
       // Assert
       expect(result.type).toBe('liability');
       expect(result.creditLimit.amount).toBe(5000);
-      expect(result.paymentDueDate?.dayOfMonth).toBe(15);
-      expect(result.paymentDueDate?.shiftDirection).toBe('before');
     });
 
     test('should create account with IBAN', async () => {
@@ -145,7 +141,6 @@ describe('Account Use Cases', () => {
       expect(result.iban).toBeNull();
       expect(result.overdraftLimit.amount).toBe(0);
       expect(result.creditLimit.amount).toBe(0);
-      expect(result.paymentDueDate).toBeNull();
     });
 
     test('should support different currencies', async () => {
@@ -336,29 +331,23 @@ describe('Account Use Cases', () => {
       // Act
       const result = await useCase.execute({
         id: '123',
-        paymentDueDate: { dayOfMonth: 20, shiftDirection: 'after' }
       });
 
       // Assert
-      expect(result.paymentDueDate?.dayOfMonth).toBe(20);
-      expect(result.paymentDueDate?.shiftDirection).toBe('after');
     });
 
     test('should clear payment due date', async () => {
       // Arrange
-      const dueDate = ExpectedPaymentDueDate.create(15, 'before');
-      const account = new Account('123', 'Account', 'liability', null, false, Money.fromAmount(0), Money.fromAmount(5000), dueDate);
+      const account = new Account('123', 'Account', 'liability', null, false, Money.fromAmount(0), Money.fromAmount(5000));
       mockRepo.findById = vi.fn().mockResolvedValue(account);
       const useCase = new UpdateAccount(mockRepo);
 
       // Act
       const result = await useCase.execute({
         id: '123',
-        paymentDueDate: null
       });
 
       // Assert
-      expect(result.paymentDueDate).toBeNull();
     });
 
     test('should throw error when account not found', async () => {

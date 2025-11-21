@@ -1,5 +1,6 @@
 import { ICategoryRepository } from '@domain/repositories/ICategoryRepository';
 import { CategoryDTO } from '@application/dtos/CategoryDTO';
+import { NotFoundError, ConflictError } from '@application/errors';
 
 export interface UpdateCategoryInput {
   id: string;
@@ -16,7 +17,7 @@ export class UpdateCategory {
     // 1. Find existing category
     const category = await this.categoryRepo.findById(input.id);
     if (!category) {
-      throw new Error('Category not found');
+      throw new NotFoundError('Category not found');
     }
 
     // 2. Update name if provided
@@ -27,7 +28,7 @@ export class UpdateCategory {
         category.groupId
       );
       if (exists && category.name !== input.name) {
-        throw new Error('Category name already exists in this group');
+        throw new ConflictError('Category name already exists in this group');
       }
 
       category.rename(input.name);
