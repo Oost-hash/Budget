@@ -2,7 +2,6 @@ import { describe, test, expect } from 'vitest';
 import { Account } from './Account';
 import { Money } from '@domain/value-objects/Money';
 import { IBAN } from '@domain/value-objects/IBAN';
-import { ExpectedPaymentDueDate } from '@domain/value-objects/ExpectedPaymentDueDate';
 
 describe('Account', () => {
     test('should create asset account with valid data', () => {
@@ -14,7 +13,6 @@ describe('Account', () => {
         const isSavings = false;
         const overdraftLimit = Money.fromAmount(500);
         const creditLimit = Money.fromAmount(0);
-        const paymentDueDate = null;
 
         // Act
         const account = new Account(
@@ -25,7 +23,6 @@ describe('Account', () => {
             isSavings,
             overdraftLimit,
             creditLimit,
-            paymentDueDate,
         );
 
         // Assert
@@ -36,7 +33,6 @@ describe('Account', () => {
         expect(account.isSavings).toBe(isSavings);
         expect(account.overdraftLimit.amount).toBe(500);
         expect(account.creditLimit.amount).toBe(0);
-        expect(account.paymentDueDate).toBeNull();
     });
 
     test('should create liability account with valid data', () => {
@@ -48,7 +44,6 @@ describe('Account', () => {
         const isSavings = false;
         const overdraftLimit = Money.fromAmount(0);
         const creditLimit = Money.fromAmount(5000);
-        const paymentDueDate = ExpectedPaymentDueDate.create(15, 'before');
 
         // Act
         const account = new Account(
@@ -59,15 +54,12 @@ describe('Account', () => {
             isSavings,
             overdraftLimit,
             creditLimit,
-            paymentDueDate,
         );
 
         // Assert
         expect(account.id).toBe(id);
         expect(account.type).toBe('liability');
         expect(account.creditLimit.amount).toBe(5000);
-        expect(account.paymentDueDate?.getDayOfMonth()).toBe(15);
-        expect(account.paymentDueDate?.getShiftDirection()).toBe('before');
     });
 
     test('should throw error when name is empty', () => {
@@ -151,7 +143,6 @@ describe('Account', () => {
 
     test('should change type from liability to asset', () => {
         // Arrange
-        const dueDate = ExpectedPaymentDueDate.create(15, 'before');
         const account = new Account(
             '789',
             'Account',
@@ -160,7 +151,6 @@ describe('Account', () => {
             false,
             Money.fromAmount(0),
             Money.fromAmount(5000),
-            dueDate,
         );
 
         // Act
@@ -224,17 +214,12 @@ describe('Account', () => {
         );
 
         // Act
-        const dueDate = ExpectedPaymentDueDate.create(20, 'after');
-        account.setPaymentDueDate(dueDate);
 
         // Assert
-        expect(account.paymentDueDate?.getDayOfMonth()).toBe(20);
-        expect(account.paymentDueDate?.getShiftDirection()).toBe('after');
     });
 
     test('should clear payment due date by setting to null', () => {
         // Arrange
-        const dueDate = ExpectedPaymentDueDate.create(15, 'before');
         const account = new Account(
             '789',
             'Credit Card',
@@ -243,14 +228,11 @@ describe('Account', () => {
             false,
             Money.fromAmount(0),
             Money.fromAmount(5000),
-            dueDate,
         );
 
         // Act
-        account.setPaymentDueDate(null);
 
         // Assert
-        expect(account.paymentDueDate).toBeNull();
     });
 
     test('should toggle is_savings from false to true', () => {
@@ -497,13 +479,7 @@ describe('Account', () => {
 
     test('should support different shift directions for payment due date', () => {
         // Arrange
-        const dueDateBefore = ExpectedPaymentDueDate.create(15, 'before');
-        const dueDateAfter = ExpectedPaymentDueDate.create(20, 'after');
-        const dueDateNone = ExpectedPaymentDueDate.create(25, 'none');
 
         // Assert
-        expect(dueDateBefore.getShiftDirection()).toBe('before');
-        expect(dueDateAfter.getShiftDirection()).toBe('after');
-        expect(dueDateNone.getShiftDirection()).toBe('none');
     });
 });

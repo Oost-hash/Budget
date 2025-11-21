@@ -2,7 +2,6 @@ import { IAccountRepository } from '@domain/repositories/IAccountRepository';
 import { AccountDTO } from '@application/dtos/AccountDTO';
 import { Money } from '@domain/value-objects/Money';
 import { IBAN } from '@domain/value-objects/IBAN';
-import { ExpectedPaymentDueDate } from '@domain/value-objects/ExpectedPaymentDueDate';
 import { NotFoundError, ConflictError } from '@application/errors';
 
 export interface UpdateAccountInput {
@@ -13,7 +12,6 @@ export interface UpdateAccountInput {
   isSavings?: boolean;
   overdraftLimit?: { amount: number; currency?: string };
   creditLimit?: { amount: number; currency?: string };
-  paymentDueDate?: { dayOfMonth: number; shiftDirection: 'before' | 'after' | 'none' } | null;
 }
 
 export class UpdateAccount {
@@ -82,17 +80,7 @@ export class UpdateAccount {
         input.creditLimit.amount,
         input.creditLimit.currency
       );
-      account.setCreditLimit(limit); 
-    }
-
-    if (input.paymentDueDate !== undefined) {
-      const dueDate = input.paymentDueDate
-        ? ExpectedPaymentDueDate.create(
-            input.paymentDueDate.dayOfMonth,
-            input.paymentDueDate.shiftDirection
-          )
-        : null;
-      account.setPaymentDueDate(dueDate);
+      account.setCreditLimit(limit);
     }
 
     // 5. Persist

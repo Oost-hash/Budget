@@ -31,12 +31,6 @@ export class AccountEntity {
   @Column('text', { default: 'EUR' })
   credit_limit_currency!: string;
 
-  @Column('integer', { nullable: true })
-  payment_due_day!: number | null;
-
-  @Column('text', { nullable: true })
-  payment_due_shift!: 'before' | 'after' | 'none' | null;
-
   @CreateDateColumn()
   created_at!: Date;
 
