@@ -5,6 +5,7 @@ import { ICategoryRepository } from '@domain/repositories/ICategoryRepository';
 import { Transaction } from '@domain/entities/Transaction';
 import { Money } from '@domain/value-objects/Money';
 import { TransactionDTO } from '@application/dtos/TransactionDTO';
+import { NotFoundError } from '@application/errors';
 import { randomUUID } from 'crypto';
 
 export interface CreateIncomeInput {
@@ -29,19 +30,19 @@ export class CreateIncome {
     // 1. Validate account exists
     const account = await this.accountRepo.findById(input.accountId);
     if (!account) {
-      throw new Error('Account not found');
+      throw new NotFoundError('Account not found');
     }
 
     // 2. Validate payee exists
     const payee = await this.payeeRepo.findById(input.payeeId);
     if (!payee) {
-      throw new Error('Payee not found');
+      throw new NotFoundError('Payee not found');
     }
 
     // 3. Validate category exists
     const category = await this.categoryRepo.findById(input.categoryId);
     if (!category) {
-      throw new Error('Category not found');
+      throw new NotFoundError('Category not found');
     }
 
     // 4. Create money value object

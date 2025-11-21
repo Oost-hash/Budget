@@ -1,4 +1,4 @@
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import { DataSource } from 'typeorm';
 import { TransactionRepository } from '@infrastructure/repositories/TransactionRepository';
 import { AccountRepository } from '@infrastructure/repositories/AccountRepository';
@@ -28,139 +28,96 @@ export function createTransactionRoutes(dataSource: DataSource): Router {
   const categoryRepo = new CategoryRepository(dataSource);
 
   // GET /transactions - Get all transactions
-  router.get('/', async (_req: Request, res: Response) => {
+  router.get('/', async (_req: Request, res: Response, next: NextFunction) => {
     try {
       const useCase = new GetAllTransactions(transactionRepo);
       const result = await useCase.execute();
       res.status(200).json(result);
     } catch (error) {
-      res.status(500).json({ error: 'Internal server error' });
+      next(error);
     }
   });
 
   // GET /transactions/:id - Get transaction by ID
-  router.get('/:id', async (req: Request, res: Response) => {
+  router.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
-      if (!id) {
-        res.status(400).json({ error: 'ID is required' });
-        return;
-      }
-
       const useCase = new GetTransactionById(transactionRepo);
-      const result = await useCase.execute({ id });
+      const result = await useCase.execute({ id: id as string });
       res.status(200).json(result);
     } catch (error) {
-      if (error instanceof Error && error.message === 'Transaction not found') {
-        res.status(404).json({ error: error.message });
-      } else {
-        res.status(500).json({ error: 'Internal server error' });
-      }
+      next(error);
     }
   });
 
   // POST /transactions/transfer - Create transfer
-  router.post('/transfer', validate(CreateTransferSchema), async (req: Request, res: Response) => {
+  router.post('/transfer', validate(CreateTransferSchema), async (req: Request, res: Response, next: NextFunction) => {
     try {
       const useCase = new CreateTransfer(transactionRepo, accountRepo);
       const result = await useCase.execute(req.body);
       res.status(201).json(result);
     } catch (error) {
-      if (error instanceof Error) {
-        res.status(400).json({ error: error.message });
-      } else {
-        res.status(500).json({ error: 'Internal server error' });
-      }
+      next(error);
     }
   });
 
   // POST /transactions/income - Create income
-  router.post('/income', validate(CreateIncomeSchema), async (req: Request, res: Response) => {
+  router.post('/income', validate(CreateIncomeSchema), async (req: Request, res: Response, next: NextFunction) => {
     try {
       const useCase = new CreateIncome(
-        transactionRepo, 
-        accountRepo, 
-        payeeRepo, 
+        transactionRepo,
+        accountRepo,
+        payeeRepo,
         categoryRepo
       );
       const result = await useCase.execute(req.body);
       res.status(201).json(result);
     } catch (error) {
-      if (error instanceof Error) {
-        res.status(400).json({ error: error.message });
-      } else {
-        res.status(500).json({ error: 'Internal server error' });
-      }
+      next(error);
     }
   });
 
   // POST /transactions/expense - Create expense
-  router.post('/expense', validate(CreateExpenseSchema), async (req: Request, res: Response) => {
+  router.post('/expense', validate(CreateExpenseSchema), async (req: Request, res: Response, next: NextFunction) => {
     try {
       const useCase = new CreateExpense(
-        transactionRepo, 
-        accountRepo, 
-        payeeRepo, 
+        transactionRepo,
+        accountRepo,
+        payeeRepo,
         categoryRepo
       );
       const result = await useCase.execute(req.body);
       res.status(201).json(result);
     } catch (error) {
-      if (error instanceof Error) {
-        res.status(400).json({ error: error.message });
-      } else {
-        res.status(500).json({ error: 'Internal server error' });
-      }
+      next(error);
     }
   });
 
   // PUT /transactions/:id - Update transaction
-  router.put('/:id', validate(UpdateTransactionSchema), async (req: Request, res: Response) => {
+  router.put('/:id', validate(UpdateTransactionSchema), async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
-      if (!id) {
-        res.status(400).json({ error: 'ID is required' });
-        return;
-      }
-
       const useCase = new UpdateTransaction(
-        transactionRepo, 
-        payeeRepo, 
+        transactionRepo,
+        payeeRepo,
         categoryRepo
       );
-      const result = await useCase.execute({ id, ...req.body });
+      const result = await useCase.execute({ id: id as string, ...req.body });
       res.status(200).json(result);
     } catch (error) {
-      if (error instanceof Error) {
-        if (error.message === 'Transaction not found') {
-          res.status(404).json({ error: error.message });
-        } else {
-          res.status(400).json({ error: error.message });
-        }
-      } else {
-        res.status(500).json({ error: 'Internal server error' });
-      }
+      next(error);
     }
   });
 
   // DELETE /transactions/:id - Delete transaction
-  router.delete('/:id', async (req: Request, res: Response) => {
+  router.delete('/:id', async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
-      if (!id) {
-        res.status(400).json({ error: 'ID is required' });
-        return;
-      }
-
       const useCase = new DeleteTransaction(transactionRepo);
-      await useCase.execute({ id });
+      await useCase.execute({ id: id as string });
       res.status(204).send();
     } catch (error) {
-      if (error instanceof Error && error.message === 'Transaction not found') {
-        res.status(404).json({ error: error.message });
-      } else {
-        res.status(500).json({ error: 'Internal server error' });
-      }
+      next(error);
     }
   });
 

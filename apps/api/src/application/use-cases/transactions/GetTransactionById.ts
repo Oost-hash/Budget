@@ -1,5 +1,6 @@
 import { ITransactionRepository } from '@domain/repositories/ITransactionRepository';
 import { TransactionDTO } from '@application/dtos/TransactionDTO';
+import { NotFoundError } from '@application/errors';
 
 export interface GetTransactionByIdInput {
   id: string;
@@ -15,7 +16,7 @@ export class GetTransactionById {
     const transaction = await this.transactionRepo.findById(input.id);
     
     if (!transaction) {
-      throw new Error('Transaction not found');
+      throw new NotFoundError('Transaction not found');
     }
 
     // 2. Convert to DTO

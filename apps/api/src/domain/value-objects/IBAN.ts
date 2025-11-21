@@ -1,20 +1,22 @@
+import { DomainError } from '@domain/errors';
+
 export class IBAN {
   private constructor(private readonly value: string) {}
 
   static create(value: string): IBAN {
     // Remove whitespace and convert to uppercase
     const cleaned = value.replace(/\s/g, '').toUpperCase();
-    
+
     // Validate length (15-34 characters)
     if (cleaned.length < 15 || cleaned.length > 34) {
-      throw new Error('Invalid IBAN length');
+      throw new DomainError('Invalid IBAN length');
     }
-    
+
     // Validate format: 2 letters (country code) + alphanumeric
     if (!/^[A-Z]{2}[0-9A-Z]+$/.test(cleaned)) {
-      throw new Error('Invalid IBAN format');
+      throw new DomainError('Invalid IBAN format');
     }
-    
+
     return new IBAN(cleaned);
   }
 
