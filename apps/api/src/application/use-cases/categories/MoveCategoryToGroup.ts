@@ -19,17 +19,22 @@ export class MoveCategoryToGroup {
       throw new NotFoundError('Category not found');
     }
 
-    // 2. Get position for target group (add to end)
+    // 2. Check if category is already in target group (no-op)
+    if (category.groupId === input.targetGroupId) {
+      return CategoryDTO.fromDomain(category);
+    }
+
+    // 3. Get position for target group (add to end)
     let newPosition = 1;
     if (input.targetGroupId) {
       const existingCategories = await this.categoryRepo.findByGroupId(input.targetGroupId);
-      newPosition = existingCategories.length + 1;
+      newPosition = (existingCategories?.length ?? 0) + 1;
     } else {
       const existingCategories = await this.categoryRepo.findWithoutGroup();
-      newPosition = existingCategories.length + 1;
+      newPosition = (existingCategories?.length ?? 0) + 1;
     }
 
-    // 3. Move category
+    // 4. Move category
     if (input.targetGroupId) {
       category.assignToGroup(input.targetGroupId);
     } else {
@@ -37,10 +42,10 @@ export class MoveCategoryToGroup {
     }
     category.changePosition(newPosition);
 
-    // 4. Persist
+    // 5. Persist
     await this.categoryRepo.save(category);
 
-    // 5. Return DTO
+    // 6. Return DTO
     return CategoryDTO.fromDomain(category);
   }
 }
